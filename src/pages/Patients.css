@@ -1,0 +1,66 @@
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-left: 10px; /* Reduced margin to move the header more to the left */
+}
+
+.add-patient-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.add-patient-button:hover {
+  background-color: #45a049;
+}
+
+.patient-table {
+  width: calc(100% - 30px); /* Slightly reduced width to keep table layout consistent */
+  border-collapse: collapse;
+  margin-left: 10px; /* Adjusted margin to align with the header */
+}
+
+.patient-table th, .patient-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.patient-table th {
+  background-color: #f2f2f2;
+}
+
+.action-button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 8px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button.view {
+  color: #4CAF50;  /* Green color for view */
+}
+
+.action-button.delete {
+  color: #f44336;  /* Red color for delete */
+}
+
+.action-button.edit {
+  color: #008CBA;  /* Blue color for edit */
+}
+
+.action-button:hover {
+  background-color: #e0e0e0;
+}

@@ -1,0 +1,35 @@
+/* AddNewPatient.css */
+.add-new-patient-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    width: 50%;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  
+  .add-patient-form .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .add-patient-form label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .add-patient-form input,
+  .add-patient-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .submit-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
