@@ -7,10 +7,10 @@ import './SideBar.css';
 const SideBar = () => {
     return (
         <div className="sidebar">
-            {/*<div className="user-section">
+            {<div className="user-section">
                 <img src="path_to_user_image" alt="User" className="user-image" />
                 <span>Super Admin</span>
-            </div>*/}
+            </div>}
             <ul>
                 <li><Link to="/dashboard"><FaUserMd className="icon" /> Dashboard</Link></li>
                 <li><Link to="/doctors"><FaUserMd className="icon" /> Doctors</Link></li>
