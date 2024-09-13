@@ -41,4 +41,10 @@ thead {
     background: none;
     border: none;
     cursor: pointer;
+    color: #FF6F6F; /* Change to a red color for the delete button */
+    font-size: 16px; /* Adjust font size as needed */
+}
+
+.action-btn:hover {
+    color: #FF3B3B; /* Darker red on hover */
 }

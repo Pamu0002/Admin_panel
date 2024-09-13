@@ -1,77 +1,146 @@
-import React, { useState } from 'react';
-import { db } from '../firebase-config'; // Import Firestore configuration
-import { collection, doc, setDoc } from 'firebase/firestore'; // Import necessary Firestore functions
+import React, { useState, useEffect } from 'react';
 import './AddSchedule.css';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const AddSchedule = () => {
     const [doctorId, setDoctorId] = useState('');
     const [doctorName, setDoctorName] = useState('');
-    const [date, setdate] = useState('');
-    const [visitingTime, setVisitingTime] = useState('');
-    const [appointmentNumber, setAppointmentNumber] = useState(''); // New state for Appointment Number
-    const [successMessage, setSuccessMessage] = useState('');
+    const [specialization, setSpecialization] = useState('');
+    const [appointmentDate, setAppointmentDate] = useState('');
+    const [selectedTimes, setSelectedTimes] = useState([]);
 
-    const handleAdd = async () => {
-        if (!doctorId || !doctorName || !date || !visitingTime || !appointmentNumber) {
-            alert("Please fill in all fields.");
+    // Example time slots
+    const timeSlots = [
+        "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
+        "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
+        "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+        "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
+    ];
+
+    const fetchDoctorDetails = async (id) => {
+        const db = getFirestore();
+        try {
+            const docRef = doc(db, 'Doctors', id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setDoctorName(data.name || '');
+                setSpecialization(data.specialization || '');
+            } else {
+                setDoctorName('');
+                setSpecialization('');
+                alert('Doctor not found.');
+            }
+        } catch (error) {
+            console.error('Error fetching doctor details: ', error);
+            alert('Failed to fetch doctor details.');
+        }
+    };
+
+    const handleDoctorIdChange = (e) => {
+        const id = e.target.value;
+        setDoctorId(id);
+        if (id) {
+            fetchDoctorDetails(id);
+        } else {
+            setDoctorName('');
+            setSpecialization('');
+        }
+    };
+
+    const handleTimeSelect = (time) => {
+        setSelectedTimes(prev => {
+            if (prev.includes(time)) {
+                return prev.filter(t => t !== time); // Remove time if already selected
+            } else if (prev.length < 2) {
+                return [...prev, time]; // Add time if less than 2 are selected
+            }
+            return prev; // Otherwise, keep the list as is
+        });
+    };
+
+    const handleSchedule = async () => {
+        if (selectedTimes.length !== 2) {
+            alert('Please select exactly two time slots.');
             return;
         }
 
-        // Create a combined document ID using Doctor ID and Appointment Number
-        const documentId = `${doctorId}-Appointment${appointmentNumber}`;
-
+        const visitingTime = selectedTimes.join(' - '); // Format as "Start Time - End Time"
+        
         try {
-            // Add a new document with the combined ID to the 'schedule' collection
-            await setDoc(doc(collection(db, "schedule"), documentId), {
-                doctorId,      // Save Doctor ID as a field
+            const db = getFirestore();
+            await setDoc(doc(db, 'schedule', doctorId), {
+                doctorId,
                 doctorName,
-                date,
-                visitingTime,
-                appointmentNumber, // Save Appointment Number as a field
+                specialization,
+                appointmentDate,
+                visitingTime
             });
-
-            // Show success message
-            setSuccessMessage("Schedule added successfully!");
-
-            // Clear input fields after adding the schedule
-            setDoctorId('');
-            setDoctorName('');
-            setdate('');
-            setVisitingTime('');
-            setAppointmentNumber('');
-
-            // Hide success message after 3 seconds
-            setTimeout(() => setSuccessMessage(''), 3000);
+            alert('Appointment scheduled successfully!');
         } catch (error) {
-            console.error("Error adding schedule: ", error);
+            console.error('Error scheduling appointment: ', error);
+            alert('Failed to schedule appointment.');
         }
     };
 
     return (
-        <div className="add-schedule">
-            <h2>Add Time Schedule</h2>
-            {successMessage && <p className="success-message">{successMessage}</p>} {/* Display success message */}
-            <div className="form-group">
-                <label>Doctor ID</label> {/* Input field for Doctor ID */}
-                <input type="text" value={doctorId} onChange={(e) => setDoctorId(e.target.value)} />
+        <div className="add-schedule-container">
+            <h2>Schedule an Appointment</h2>
+            <div className="add-schedule-form">
+                <div className="form-field">
+                    <label htmlFor="doctorId">Doctor ID:</label>
+                    <input
+                        id="doctorId"
+                        type="text"
+                        value={doctorId}
+                        onChange={handleDoctorIdChange}
+                    />
+                </div>
+                <div className="form-field">
+                    <label htmlFor="doctorName">Doctor Name:</label>
+                    <input
+                        id="doctorName"
+                        type="text"
+                        value={doctorName}
+                        readOnly
+                    />
+                </div>
+                <div className="form-field">
+                    <label htmlFor="specialization">Specialization:</label>
+                    <input
+                        id="specialization"
+                        type="text"
+                        value={specialization}
+                        readOnly
+                    />
+                </div>
+                <div className="date-time-section">
+                    <div className="form-field">
+                        <label htmlFor="appointmentDate">Select Date:</label>
+                        <input
+                            id="appointmentDate"
+                            type="date"
+                            value={appointmentDate}
+                            onChange={(e) => setAppointmentDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-field">
+                        <label htmlFor="appointmentTime">Select Time:</label>
+                        <div className="time-slots">
+                            {timeSlots.map((time, index) => (
+                                <button
+                                    key={index}
+                                    className={`time-slot ${selectedTimes.includes(time) ? 'selected' : ''}`}
+                                    onClick={() => handleTimeSelect(time)}
+                                >
+                                    {time}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <button onClick={handleSchedule}>Confirm</button>
             </div>
-            <div className="form-group">
-                <label>Doctor Name</label>
-                <input type="text" value={doctorName} onChange={(e) => setDoctorName(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label>Date</label>
-                <input type="text" value={date} onChange={(e) => setdate(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label>Visiting Time</label>
-                <input type="text" value={visitingTime} onChange={(e) => setVisitingTime(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label>Appointment Number</label> {/* New input field for Appointment Number */}
-                <input type="text" value={appointmentNumber} onChange={(e) => setAppointmentNumber(e.target.value)} />
-            </div>
-            <button className="add-btn" onClick={handleAdd}>Add Schedule</button>
         </div>
     );
 };

@@ -1,38 +1,92 @@
-.add-schedule {
+.add-schedule-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     padding: 20px;
-    max-width: 500px;
-    margin: 0 auto;
+    background-color: #f4f4f4;
+    overflow-y: auto; /* Allows scrolling if content overflows */
 }
 
-h2 {
+.add-schedule-container h2 {
     text-align: center;
     margin-bottom: 20px;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.add-schedule-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px; /* Reduced gap between form fields */
 }
 
-label {
-    display: block;
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field label {
     margin-bottom: 5px;
+    font-weight: bold;
 }
 
-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
+.form-field input {
+    padding: 4px; /* Reduced padding */
+    border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 12px; /* Reduced font size */
+    width: 100%; /* Full width of the container */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
 }
 
-.add-btn {
-    background-color: #0AA1DD;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+.date-time-section {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Adjusted column sizes */
+    gap: 15px; /* Reduced gap between date and time section */
+    grid-column: 1 / -1; /* Span across all columns */
+    align-items: start; /* Align items to the start */
+}
+
+.date-time-section .form-field {
+    margin-bottom: 0; /* Remove bottom margin */
+}
+
+.date-time-section input[type="date"] {
+    width: 100%; /* Ensure input takes full width of its container */
+    font-size: 12px; /* Reduced font size */
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns for smaller time slots */
+    gap: 6px; /* Reduced gap between time slots */
+}
+
+.time-slot {
+    padding: 4px; /* Reduced padding */
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     cursor: pointer;
-    display: block;
-    width: 100%;
-    margin-top: 10px;
+    text-align: center;
+    color: black;
+    font-size: 10px; /* Reduced font size */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+    height: 24px; /* Further reduced height */
+}
+
+.time-slot.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+button {
+    grid-column: span 2;  /* Span across all columns for alignment */
+    padding: 6px; /* Reduced padding */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px; /* Reduced font size */
+    height: 30px; /* Set a fixed height */
 }

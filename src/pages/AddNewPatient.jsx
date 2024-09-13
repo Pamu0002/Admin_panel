@@ -52,11 +52,21 @@ const AddNewPatient = () => {
     }
   };
 
+  // Function to get the current weekday
+  const getCurrentWeekday = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDate = new Date(); // Current date and time
+    return days[currentDate.getDay()]; // Returns weekday name based on current day index
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       const patientId = await generatePatientId();
-      const patientData = { ...formData };
+      const patientData = { 
+        ...formData, 
+        weekday: getCurrentWeekday()  // Add the weekday field
+      };
 
       await setDoc(doc(db, 'user', patientId), patientData);
       console.log('Patient added successfully'); // Debug statement

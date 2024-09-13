@@ -1,149 +1,103 @@
-/* Main container styling */
-.login-container {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+  }
+  
+  .login-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-color: #f0f5f7;
-    position: relative; /* Allows for absolute positioning of the logo */
-}
-
-/* Logo styling */
-.login-logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    display: flex;
-    align-items: center;
-}
-
-/* Adjust the size of the logo image */
-.login-logo img {
-    width: 80px; /* Adjust size as needed */
-    height: 80px; /* Adjust size as needed */
-    margin-right: 10px; /* Space between the logo and text */
-}
-
-/* Styling for the "Medi" text */
-.logo-medi {
-    font-size: 1.5rem; /* Adjust size as needed */
-    font-weight: bold;
-    color: #2c8c84; /* Adjust color as needed */
-}
-
-/* Styling for the "Connect" text */
-.logo-connect {
-    font-size: 1.5rem; /* Adjust size as needed */
-    font-weight: bold;
-    color: #2c8c84; /* Adjust color as needed */
-}
-
-/* Content layout */
-.login-content {
-    display: flex;
-    align-items: center;
-    margin-bottom: 50px;
-}
-
-/* Image styling */
-.login-image img {
-    width: 500px;
-    height: auto;
-    border-radius: 10px;
-}
-
-/* Form styling */
-.login-form {
-    margin-left: 50px;
-    max-width: 300px;
-}
-
-.login-form h2 {
-    color: #2c8c84;
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-.login-form input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Options styling */
-.login-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.login-options .remember-me {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap; /* Ensure the text and checkbox stay on the same line */
-}
-
-.login-options a {
-    color: #2c8c84;
-    text-decoration: none;
-}
-
-/* Button styling */
-.login-form button {
-    width: 100%;
-    padding: 12px;
-    background-color: #2c8c84;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Footer text and link styling */
-.login-form p {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.login-form span {
-    color: #2c8c84;
-    cursor: pointer;
-}
-
-/* Footer styling */
-.login-footer {
-    position: absolute;
-    bottom: 20px;
+  }
+  
+  .login-left {
+    flex: 1;
     display: flex;
     justify-content: center;
+    align-items: center;
+  }
+  
+  .login-image {
+    width: 250px;; /* Adjust this to make the image as large as possible */
+    height: 300px;
+    border-radius: 8px;
+
+  }
+  
+  .login-right {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px; /* Reduced padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    max-width: 4000px;
     width: 100%;
-    gap: 50px;
-}
-
-.footer-icon {
-    font-size: 1.5rem;
-    color: #2c8c84;
-}
-
-.logo-medi {
-    font-size: 2em;
+  }
+  
+  .login-title {
+    font-size: 24px;
+    color: #0A3D62;
+    margin-bottom: 10px; /* Reduced space */
+    text-align: center;
+  }
+  
+  .login-form label {
+    display: block;
+    margin-bottom: 6px; /* Reduced margin */
+    color: #333;
     font-weight: bold;
-    color: red;
-}
-
-.logo-connect {
-    font-size: 2em;
-    font-weight: bold;
-    color: green;
-}
-
-.login-form h2 {
-    color: #2c8c84;
-    font-size: 60px; /* Adjusted size in pixels */
-    margin-bottom: 20px;
-}
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px; /* Reduced margin */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .forgot-password {
+    display: block;
+    text-align: right;
+    margin-bottom: 10px; /* Reduced space */
+    color: #0A3D62;
+    text-decoration: none;
+  }
+  
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+  
+  .login-button {
+    width: 100%;
+    padding: 10px; /* Reduced padding */
+    background-color: #0A3D62;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .login-button:hover {
+    background-color: #07518B;
+  }
+  
+  @media (max-width: 768px) {
+    .login-container {
+      flex-direction: column;
+    }
+  
+    .login-left,
+    .login-right {
+      max-width: 100%;
+      flex: none;
+    }
+  }
+  
