@@ -38,7 +38,7 @@
 
 /* Text styling within the stat-item */
 .stat-item div {
-    font-size: 18px; /* Adjust font size as needed */
+    font-size: 14px; /* Adjust font size as needed */
     font-weight: bold; /* Make text bold for emphasis */
     line-height: 1.5; /* Adjust line height for spacing */
     word-wrap: break-word; /* Ensure long words are wrapped */

@@ -7,7 +7,11 @@ import './SideBar.css';
 const SideBar = () => {
     return (
         <div className="sidebar">
-            
+            <div className="logo">
+                
+                <span className="logo-medi">Medi</span>
+                <span className="logo-connect">Connect</span>
+            </div>
             <ul>
                 <li><Link to="/dashboard"><FaUserMd className="icon" /> Dashboard</Link></li>
                 <li><Link to="/doctors"><FaUserMd className="icon" /> Doctors</Link></li>

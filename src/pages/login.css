@@ -1,6 +1,6 @@
 * {
     margin: 0;
-    padding: 0;
+    padding:0;
     box-sizing: border-box;
   }
   
@@ -17,15 +17,15 @@
   }
   
   .login-left {
-    flex: 1;
+    flex:1;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   
   .login-image {
-    width: 250px;; /* Adjust this to make the image as large as possible */
-    height: 300px;
+    width: 500px;; /* Adjust this to make the image as large as possible */
+    height: 600px;
     border-radius: 8px;
 
   }
@@ -37,7 +37,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     max-width: 4000px;
-    width: 100%;
+    width: 200%;
   }
   
   .login-title {

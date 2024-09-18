@@ -67,21 +67,21 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className="stat-item patients">
-                    <FaUserInjured size={80} /> {/* Icon for Patients */}
+                    <FaUserInjured size={60} /> {/* Icon for Patients */}
                     <div>
                         <div>{patientCount}</div> {/* Dynamic Patient Count */}
                         <div>Patients</div>
                     </div>
                 </div>
                 <div className="stat-item attended">
-                    <FaCalendarCheck size={80} /> {/* Icon for Attended */}
+                    <FaCalendarCheck size={40} /> {/* Icon for Attended */}
                     <div>
                         <div>2</div>
                         <div>Patients Appointment</div>
                     </div>
                 </div>
                 <div className="stat-item pending">
-                    <FaCalendarAlt size={80} /> {/* Icon for Pending */}
+                    <FaCalendarAlt size={60} /> {/* Icon for Pending */}
                     <div>
                         <div>1</div>
                         <div>Pending</div>
@@ -93,7 +93,7 @@ const Dashboard = () => {
                 {/* Bar Chart */}
                 <div className="chart">
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="day" />
                             {/* Customize Y-axis with interval */}
