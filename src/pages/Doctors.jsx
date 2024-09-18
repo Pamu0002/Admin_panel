@@ -61,15 +61,17 @@ const Doctors = () => {
         </div>
       </div>
       <div className="doctor-list">
-        <h2>Doctor List</h2>
-        <div className="filter-container">
-          <input type="text" placeholder="Filter" className="filter-input" />
+        <div className="doctor-list-header">
+          <h2>Doctor List</h2>
+          <div className="filter-container">
+            <input type="text" placeholder="Filter" className="filter-input" />
+          </div>
         </div>
         <table className="doctor-table">
           <thead>
             <tr>
               <th>DoctorID</th>
-              <th>Name</th> {/* Add Name Column */}
+              <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Specialization</th>
@@ -80,15 +82,15 @@ const Doctors = () => {
             {doctors.map(doctor => (
               <tr key={doctor.id}>
                 <td>{doctor.doctorId}</td>
-                <td>
-                <Link to={`/doctor/${doctor.id}`}>{doctor.name}</Link> {/* Dynamic Link */}
-              </td>
+                <td><Link to={`/doctor/${doctor.id}`}>{doctor.name}</Link></td>
                 <td>{doctor.email}</td>
                 <td>{doctor.phone}</td>
                 <td>{doctor.specialization}</td>
                 <td>
                   <div className="status-container">
-                    <span className="status-label">{doctor.status === 'Active' ? 'Active' : 'Deactivate'}</span>
+                    <span className={`status-label ${doctor.status === 'Active' ? 'active' : 'inactive'}`}>
+                      {doctor.status === 'Active' ? 'Active' : 'Deactivate'}
+                    </span>
                     <label className="switch">
                       <input
                         type="checkbox"
@@ -97,7 +99,9 @@ const Doctors = () => {
                       />
                       <span className="slider round"></span>
                     </label>
-                    <span className="status-label">{doctor.status === 'Active' ? 'Deactivate' : 'Activate'}</span>
+                    <span className={`status-label ${doctor.status === 'Active' ? 'inactive' : 'active'}`}>
+                      {doctor.status === 'Active' ? 'Deactivate' : 'Activate'}
+                    </span>
                   </div>
                 </td>
               </tr>

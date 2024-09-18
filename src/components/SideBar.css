@@ -1,60 +1,112 @@
-/* src/components/SideBar.css */
-
+/* Sidebar container */
 .sidebar {
-    width: 250px;
+    width: 270px; /* Set to match compact design */
     height: 100vh;
-    background-color: rgba(24, 51, 78, 1);
-    padding-top: 60px; /* Adjust for the topbar height */
+    background-color: #16304A; /* Dark blue background */
+    padding-top: 20px;
     position: fixed;
     top: 0;
     left: 0;
-    overflow-y: auto;
-    color: white; /* Sets the text color to white */
-}
-
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.sidebar ul li {
-    padding: 15px;
-    text-align: left;
-    display: flex;
-    align-items: center;
-}
-
-.sidebar ul li a {
-    text-decoration: none;
-    color: white; /* Change the text color to white */
-    display: flex;
-    align-items: center;
-    width: 100%;
-    transition: background-color 0.3s;
-    padding: 10px;
-}
-
-.sidebar ul li a:hover {
-    background-color: #e0f2f1; /* Light green background on hover */
-    color: black; /* Change text color to black on hover */
-}
-
-
-.sidebar .user-section {
+    color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    overflow-y: auto;
 }
 
-.user-section img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-bottom: 10px;
+/* Logo section with box and shadow */
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color:rgba(24, 51, 78, 1); /* White background for the logo box */
+    border-radius: 10px; /* Slightly rounded corners */
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow under the logo box */
+    margin-bottom: 40px; /* Space between logo and menu */
+    width: 100%; /* Fit well inside the sidebar */
 }
 
+/* Logo image adjustments */
+.logo-image {
+    width: 10px; /* Adjust size to fit the sidebar */
+    height: 10px;
+    margin-right: 10px;
+}
+
+/* Logo text next to image */
+.logo-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.logo-medi {
+    font-family: "Latin Modern Roman", "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(189, 195, 199, 1); /* Light gray color for "Medi" */
+}
+
+.logo-connect {
+    font-family: "Latin Modern Roman", "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(42, 163, 144, 1); /* Teal color for "Connect" */
+    margin-left: 5px;
+}
+
+
+
+/* Sidebar list */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar ul li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-decoration: none;
+    color: white;
+    width: 100%;
+    padding: 10px 20px;
+    transition: all 0.3s;
+    border-radius: 4px;
+    background-color: transparent;
+}
+
+/* Hover and active states */
+.sidebar ul li a:hover, .sidebar ul li a.active {
+    background-color: #217A64; /* Hover color for links */
+    color: white;
+}
+
+/* Sidebar icons */
 .sidebar .icon {
     margin-right: 10px;
+    font-size: 35px;
     color: white;
+}
+
+/* Adjust text and spacing */
+.sidebar ul li a span {
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.sidebar ul li a:hover .icon, .sidebar ul li a.active .icon {
+    color: #e0f2f1;
 }
