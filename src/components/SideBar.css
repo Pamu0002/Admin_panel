@@ -3,7 +3,7 @@
     width: 270px; /* Set to match compact design */
     height: 100vh;
     background-color: #16304A; /* Dark blue background */
-    padding-top: 20px;
+    
     position: fixed;
     top: 0;
     left: 0;
@@ -22,15 +22,15 @@
     background-color:rgba(24, 51, 78, 1); /* White background for the logo box */
     border-radius: 10px; /* Slightly rounded corners */
     padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow under the logo box */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow under the logo box */
     margin-bottom: 40px; /* Space between logo and menu */
     width: 100%; /* Fit well inside the sidebar */
 }
 
 /* Logo image adjustments */
 .logo-image {
-    width: 10px; /* Adjust size to fit the sidebar */
-    height: 10px;
+    width: 70px; /* Adjust size to fit the sidebar */
+    height: 50px;
     margin-right: 10px;
 }
 

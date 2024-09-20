@@ -11,19 +11,27 @@
   margin-bottom: 20px;
 }
 
-.add-doctor {
-  background-color: #2aa390;
+
+.submit-button {
+  background-color: #28a745;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 0; /* Adjust padding to focus on vertical centering */
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 15px;
   font-size: 16px;
   transition: background-color 0.3s ease;
+  width: 150px;
+  height: 50px; /* Set a fixed height to help with centering */
+
+  /* Flexbox for centering */
+  display: flex;
+  align-items: center; /* Vertical centering */
+  justify-content: center; /* Horizontal centering */
 }
 
-.add-doctor:hover {
-  background-color: #238575;
+.submit-button:hover {
+  background-color: #218838;
 }
 
 .breadcrumb {

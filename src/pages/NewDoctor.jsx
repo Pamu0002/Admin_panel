@@ -1,77 +1,65 @@
 import React, { useState } from 'react';
-import { db } from '../firebase-config'; // Correct import path
-import { doc, setDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Import storage functions
+import { db } from '../firebase-config'; 
+import { doc, setDoc, getDoc, updateDoc, setDoc as setNewDoc } from 'firebase/firestore';
 import './NewDoctor.css';
 
 const NewDoctor = () => {
   const [doctor, setDoctor] = useState({
-    doctorId: '',
-    id: '', // This is used as the document ID
-    name: '',
-    nic: '',
-    email: '',
-    phone: '',
-    slmcNumber: '',
+    fullName: '',
+    gender: '',
     specialization: '',
-    experience: '',
-    qualifications: '',
-    hospital: '',
-    fees: '', // New field for Doctor Fees
-    photoUrl: '' // To save the uploaded photo URL
+    address: '',
+    email: '',
+    dob: '',
+    nic: '',
+    allergies: '',
+    phoneNumber: '',
+    status: '',
+    bloodGroup: '',
+    biography: '',
+    designation: ''
   });
 
-  const [image, setImage] = useState(null); // State to manage the selected image file
   const [message, setMessage] = useState({
     text: '',
-    type: '' // 'success' or 'error'
+    type: ''
   });
 
   const handleChange = (e) => {
-    if (e.target.name === 'photo') {
-      // Handle file input separately
-      setImage(e.target.files[0]);
-    } else {
-      setDoctor({ ...doctor, [e.target.name]: e.target.value });
-    }
+    setDoctor({ ...doctor, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!doctor.id) {
-      setMessage({
-        text: 'Doctor ID is required.',
-        type: 'error'
-      });
-      return;
-    }
-
     try {
-      let photoUrl = ''; // Initialize photo URL
+      // Reference to DoctorIDs document
+      const idDocRef = doc(db, 'DoctorIDs', 'current');
+
+      // Retrieve the current ID document
+      let idDoc = await getDoc(idDocRef);
       
-      if (image) {
-        const storage = getStorage(); // Initialize Firebase Storage
-        const storageRef = ref(storage, `doctors/${doctor.id}`); // Create a storage reference
-        await uploadBytes(storageRef, image); // Upload file
-        photoUrl = await getDownloadURL(storageRef); // Get the download URL
+      if (!idDoc.exists()) {
+        // If the document does not exist, create it with initial ID
+        await setDoc(idDocRef, { current_id: 'D00' });
+        idDoc = await getDoc(idDocRef); // Retrieve the document again
       }
 
-      // Save to Firestore with document name as Doctor ID in the 'Doctors' collection
-      await setDoc(doc(db, 'Doctors', doctor.id), {
-        doctorId: doctor.id, // Doctor ID saved as a field
-        name: doctor.name,
-        nic: doctor.nic,
-        email: doctor.email,
-        phone: doctor.phone,
-        slmcNumber: doctor.slmcNumber,
-        specialization: doctor.specialization,
-        experience: doctor.experience,
-        qualifications: doctor.qualifications,
-        hospital: doctor.hospital,
-        fees: doctor.fees, // Include the new Doctor Fees field
-        photoUrl: photoUrl // Save the image URL in Firestore
+      const currentId = idDoc.data().current_id;
+      
+      // Calculate the next ID
+      const nextIdNumber = parseInt(currentId.slice(1)) + 1;
+      const nextId = `D${nextIdNumber.toString().padStart(2, '0')}`;
+
+      // Add the new doctor with the new ID
+      const doctorRef = doc(db, 'Doctors', nextId);
+      await setDoc(doctorRef, {
+        ...doctor,
+        id: nextId
       });
+
+      // Update the DoctorIDs collection with the new ID
+      await updateDoc(idDocRef, { current_id: nextId });
 
       setMessage({
         text: 'Doctor added successfully!',
@@ -80,24 +68,23 @@ const NewDoctor = () => {
 
       // Reset form
       setDoctor({
-        doctorId: '',
-        id: '',
-        name: '',
-        nic: '',
-        email: '',
-        phone: '',
-        slmcNumber: '',
+        fullName: '',
+        gender: '',
         specialization: '',
-        experience: '',
-        qualifications: '',
-        hospital: '',
-        fees: '', // Reset Doctor Fees field
-        photoUrl: '' // Reset photo URL field
+        address: '',
+        email: '',
+        dob: '',
+        nic: '',
+        allergies: '',
+        phoneNumber: '',
+        status: '',
+        bloodGroup: '',
+        biography: '',
+        designation: ''
       });
-      setImage(null); // Reset image file state
 
     } catch (error) {
-      console.error('Error adding doctor: ', error);
+      console.error('Error details:', error.message); // Log detailed error message
       setMessage({
         text: 'Error adding doctor. Please try again.',
         type: 'error'
@@ -106,153 +93,159 @@ const NewDoctor = () => {
   };
 
   return (
-    <div className="new-doctor-container">
+    <div className="form-container">
       <h2>Register a Doctor</h2>
       <form className="doctor-form" onSubmit={handleSubmit}>
-        <div className="form-section">
-          <h3>Personal Information</h3>
-          <div className="form-group-half">
-            <label>Doctor ID</label>
-            <input
-              type="text"
-              name="id" // Use this field for both document ID and field
-              value={doctor.id}
-              onChange={handleChange}
-              placeholder="Enter Doctor ID"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={doctor.name}
-              onChange={handleChange}
-              placeholder="Enter doctor's full name"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>NIC</label>
-            <input
-              type="text"
-              name="nic"
-              value={doctor.nic}
-              onChange={handleChange}
-              placeholder="Enter NIC"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={doctor.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Phone No</label>
-            <input
-              type="tel"
-              name="phone"
-              value={doctor.phone}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Doctor Fees</label>
-            <input
-              type="text"
-              name="fees"
-              value={doctor.fees}
-              onChange={handleChange}
-              placeholder="Enter Doctor Fees"
-              required
-            />
-          </div>
+        <div className="form-group-half">
+          <label>Full Name:</label>
+          <input
+            type="text"
+            name="fullName"
+            value={doctor.fullName}
+            onChange={handleChange}
+            required
+          />
         </div>
 
-        <div className="form-section">
-          <h3>Professional Information</h3>
-          <div className="form-group-half">
-            <label>SLMC Number</label>
-            <input
-              type="text"
-              name="slmcNumber"
-              value={doctor.slmcNumber}
-              onChange={handleChange}
-              placeholder="Enter SLMC number"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Specialization</label>
-            <input
-              type="text"
-              name="specialization"
-              value={doctor.specialization}
-              onChange={handleChange}
-              placeholder="Enter specialization"
-              required
-            />
-          </div>
-          <div className="form-group-half">
-            <label>Years of Experience</label>
-            <input
-              type="text"
-              name="experience"
-              value={doctor.experience}
-              onChange={handleChange}
-              placeholder="Enter years of experience"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Qualifications</label>
-            <textarea
-              name="qualifications"
-              value={doctor.qualifications}
-              onChange={handleChange}
-              placeholder="Enter qualifications"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Hospital/Clinical Affiliations</label>
-            <input
-              type="text"
-              name="hospital"
-              value={doctor.hospital}
-              onChange={handleChange}
-              placeholder="Enter hospital/clinical affiliations"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Upload a Photo</label>
-            <input
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="form-group-half">
+          <label>Gender:</label>
+          <input
+            type="text"
+            name="gender"
+            value={doctor.gender}
+            onChange={handleChange}
+            required
+          />
         </div>
 
-        <button type="submit" className="submit-button">Register</button>
+        <div className="form-group-half">
+          <label>Specialization:</label>
+          <input
+            type="text"
+            name="specialization"
+            value={doctor.specialization}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Address:</label>
+          <input
+            type="text"
+            name="address"
+            value={doctor.address}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={doctor.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Date of Birth:</label>
+          <input
+            type="date"
+            name="dob"
+            value={doctor.dob}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>NIC:</label>
+          <input
+            type="text"
+            name="nic"
+            value={doctor.nic}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Allergies or Other:</label>
+          <input
+            type="text"
+            name="allergies"
+            value={doctor.allergies}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Phone Number:</label>
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={doctor.phoneNumber}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Status:</label>
+          <input
+            type="text"
+            name="status"
+            value={doctor.status}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-half">
+          <label>Blood Group:</label>
+          <input
+            type="text"
+            name="bloodGroup"
+            value={doctor.bloodGroup}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group-full">
+          <label>Biography:</label>
+          <textarea
+            name="biography"
+            value={doctor.biography}
+            onChange={handleChange}
+            rows="3"
+            required
+          />
+        </div>
+
+        <div className="form-group-full">
+          <label>Designation:</label>
+          <input
+            type="text"
+            name="designation"
+            value={doctor.designation}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="button-container">
+          <button type="submit" className="submit-button">Register</button>
+        </div>
       </form>
+
+      {/* Display message */}
       {message.text && (
-        <div className={`message ${message.type}`}>
-          {message.text}
-        </div>
+        <div className={`message ${message.type}`}>{message.text}</div>
       )}
     </div>
   );

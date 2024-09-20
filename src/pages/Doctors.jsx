@@ -18,9 +18,9 @@ const Doctors = () => {
         const doctorsData = snapshot.docs.map(doc => ({
           id: doc.id,
           doctorId: doc.id,
-          name: doc.data().name || '', // Add name field
+          name: doc.data().fullName || '', // Add name field
           email: doc.data().email || '',
-          phone: doc.data().phone || '',
+          phone: doc.data().phoneNumber || '',
           specialization: doc.data().specialization || '',
           status: doc.data().status || 'Inactive'
         }));
@@ -64,7 +64,7 @@ const Doctors = () => {
         <div className="doctor-list-header">
           <h2>Doctor List</h2>
           <div className="filter-container">
-            <input type="text" placeholder="Filter" className="filter-input" />
+            <input type="text" placeholder="Search" className="filter-input" />
           </div>
         </div>
         <table className="doctor-table">

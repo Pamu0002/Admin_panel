@@ -1,93 +1,103 @@
-.new-doctor-container {
-  width: 100%; /* Increased width for larger screen size */
-  margin: 40px auto;
-  background-color: #f8f9fa;
-  padding: 30px; /* Increased padding for a more spacious look */
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
+/* Container styling for the form */
+
+.form-container {
+  width: 95%;
+  margin: 30px auto;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  font-family: Inter, sans-serif;
 }
 
-.new-doctor-container h2 {
-  text-align: left;
-  color: #5bc0de;
-  margin-bottom: 25px; /* Adjusted margin for spacing */
-  font-size: 50px;
+.form-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.form-section {
-  margin-bottom: 35px; /* Adjusted margin to create more space between sections */
-}
-
-.form-section h3 {
-  color: #5bc0de;
-  margin-bottom: 20px; /* Adjusted margin for section headers */
-  font-size: 30px;
-}
-
+/* Form layout */
 .doctor-form {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .form-group-half {
-  width: 47%; /* Adjusted width for better alignment on larger screens */
+  width: 48%;
   margin-bottom: 20px;
-  display: inline-block;
-  margin-right: 3%; /* Slightly increased margin between half-width fields */
-  vertical-align: top; /* Align the top of the input fields */
-  font-size: 20px;
 }
 
-.form-group-half:nth-child(even) {
-  margin-right: 0; /* No margin for even fields to fit properly */
-}
-
-.form-group {
-  width: 100%; /* Full width for fields that need more space */
+.form-group-full {
+  width: 48%;
   margin-bottom: 20px;
-  font-size: 20px;
 }
 
-.form-group label {
-  margin-bottom: 8px;
+/* Label and input field styles */
+.form-group-half, 
+.form-group-full {
+  display: flex; /* Makes label and input align horizontally */
+  align-items: center; /* Aligns input with label vertically */
+}
+
+.form-group-half label, 
+.form-group-full label {
+  margin-bottom: 0; /* Remove default margin */
+  margin-right: 5px; /* Adds space between label and input */
   font-weight: bold;
-  display: block;
+  color: #555;
+  width: 25%; /* Set a fixed width for the labels */
 }
 
-.form-group input, .form-group textarea {
-  width: 100%;
-  padding: 12px; /* Increased padding for larger input fields */
+.form-group-half input,
+.form-group-full input,
+.form-group-full textarea {
+  width: 70%; /* Take up the remaining space */
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-size: 16px;
 }
 
-.form-group input:focus, .form-group textarea:focus {
-  border-color: #5bc0de;
-  outline: none;
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding: 10px;
 }
 
 .submit-button {
-  background-color: #5bc0de;
+  background-color: #28a745;
   color: white;
-  padding: 12px 20px; /* Larger button with more padding */
+  padding: 12px 0; /* Adjust padding to focus on vertical centering */
   border: none;
   cursor: pointer;
-  border-radius: 5px;
-  font-size: 18px; /* Slightly larger font for readability */
-  margin-top: 20px;
+  border-radius: 15px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: 150px;
+  height: 50px; /* Set a fixed height to help with centering */
+
+  /* Flexbox for centering */
+  display: flex;
+  align-items: center; /* Vertical centering */
+  justify-content: center; /* Horizontal centering */
 }
 
 .submit-button:hover {
-  background-color: #46a5c5;
+  background-color: #218838;
 }
 
+
+/* Message styling */
 .message {
-  margin-top: 25px;
-  padding: 20px;
+  margin-top: 20px;
+  padding: 15px;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -103,85 +113,9 @@
   border: 1px solid #f5c6cb;
 }
 
-.form-group input {
-  width: 100%; /* Makes the input fill the width of its container */
-  max-width: 400px; /* Sets a maximum width for the input */
-  height: 40px; /* Adjusts the height of the input box */
-  padding: 10px; /* Adds padding inside the input box */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 20px; /* Adjusts the font size inside the input */
-}
-
-.form-group-half input {
-  width: 90%; /* Adjusts the input width for half-width fields */
-  max-width: 300px; /* Sets a maximum width for half-width input */
-  height: 40px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 20px;
-}
-
-.form-group input {
-  width: 100%; /* Makes the input fill the width of its container */
-  max-width: 400px; /* Sets a maximum width for the input */
-  height: 40px; /* Adjusts the height of the input box */
-  padding: 10px; /* Adds padding inside the input box */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px; /* Adjusts the font size inside the input */
-}
-
-.form-group-half input {
-  width: 90%; /* Adjusts the input width for half-width fields */
-  max-width: 300px; /* Sets a maximum width for half-width input */
-  height: 40px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.form-group {
-  margin-bottom: 20px; /* Space between form groups */
-}
-
-.form-group label {
-  display: block; /* Ensures label takes full width */
-  margin-bottom: 8px; /* Space between label and input field */
-  font-weight: bold;
-}
-
-.form-group input {
-  width: 100%; /* Makes the input fill the width of its container */
-  max-width: 400px; /* Sets a maximum width for the input */
-  height: 40px; /* Adjusts the height of the input box */
-  padding: 10px; /* Adds padding inside the input box */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px; /* Adjusts the font size inside the input */
-}
-
-.form-group-half {
-  width: 48%; /* Adjusted width for better alignment on larger screens */
-  margin-bottom: 20px;
-  display: inline-block;
-  margin-right: 2%; /* Margin between two half-width fields */
-  vertical-align: top; /* Align the top of the input fields */
-}
-
-.form-group-half label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.form-group-half input {
-  width: 100%;
-  height: 40px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .form-group-half {
+    width: 100%;
+  }
 }
