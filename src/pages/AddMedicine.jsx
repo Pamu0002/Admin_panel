@@ -1,156 +1,111 @@
-import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
-import { db } from '../firebase-config';
-import './NewDoctor.css';
+import './AddMedicine.css'; // CSS file for AddMedicine styling
+import AddmediImage from '../assets/images/Addmedicine.png';
+import { db } from '../firebase-config'; // Make sure you import your Firebase config
+import { doc, setDoc } from 'firebase/firestore';
 
-const NewDoctor = () => {
-  const [doctor, setDoctor] = useState({
-    id: '', // Doctor Id field added here
-    fullName: '',
-    gender: '',
-    hospital: '',
-    specialization: '',
-    email: '',
-    dob: '',
-    nic: '',
-    UserName: '',
-    password: '',
-    phoneNumber: '',
-    status: '',
-    biography: '',
-    designation: ''
-  });
-
-  const [message, setMessage] = useState({
-    text: '',
-    type: ''
-  });
-
-  const handleChange = (e) => {
-    setDoctor({ ...doctor, [e.target.name]: e.target.value });
-  };
+function AddMedicine() {
+  const [medicineId, setMedicineId] = useState('');
+  const [medicineName, setMedicineName] = useState('');
+  const [brandName, setBrandName] = useState('');
+  const [medicineType, setMedicineType] = useState('');
+  const [price, setPrice] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const doctorId = doctor.id;
+      // Prepare medicine data to save
+      const medicineData = {
+        medicineName,
+        brandName,
+        medicineType,
+        price,
+      };
 
-      // Create a document in Firestore with the provided doctor Id
-      const doctorRef = doc(db, 'Doctors', doctorId);
-      await setDoc(doctorRef, { ...doctor });
+      // Create a document in Firestore with the medicineId as the document name
+      await setDoc(doc(db, 'Medicine', medicineId), medicineData);
 
-      setMessage({ text: 'Doctor added successfully!', type: 'success' });
-
+      setMessage('Medicine added successfully!');
+      
       // Reset form fields after submission
-      setDoctor({
-        id: '',
-        fullName: '',
-        gender: '',
-        hospital: '',
-        specialization: '',
-        email: '',
-        dob: '',
-        nic: '',
-        UserName: '',
-        password: '',
-        phoneNumber: '',
-        status: '',
-        biography: '',
-        designation: ''
-      });
-
+      setMedicineId('');
+      setMedicineName('');
+      setBrandName('');
+      setMedicineType('');
+      setPrice('');
     } catch (error) {
-      console.error('Error adding doctor:', error.message);
-      setMessage({ text: 'Error adding doctor. Please try again.', type: 'error' });
+      console.error('Error adding medicine:', error);
+      setMessage('Failed to add medicine. Please check the console for details.');
     }
   };
 
   return (
-    <div className="form-container">
-      <h2>Register a Doctor</h2>
-      <form className="doctor-form" onSubmit={handleSubmit}>
-        
-        <div className="form-group-half">
-          <label>Doctor Id:</label>
-          <input type="text" name="id" value={doctor.id} onChange={handleChange} required />
-        </div>
+    <div className="add-medicine-container">
+      <h2 className="page-title">Add Medicine</h2>
+      <div className="add-medicine-content">
+        <form className="add-medicine-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Medicine Id:</label>
+            <input
+              type="text"
+              value={medicineId}
+              onChange={(e) => setMedicineId(e.target.value)}
+              placeholder="Enter Medicine Id"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Medicine Name:</label>
+            <input
+              type="text"
+              value={medicineName}
+              onChange={(e) => setMedicineName(e.target.value)}
+              placeholder="Enter Medicine Name"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Brand Name:</label>
+            <input
+              type="text"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              placeholder="Enter Brand Name"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Medicine Type:</label>
+            <input
+              type="text"
+              value={medicineType}
+              onChange={(e) => setMedicineType(e.target.value)}
+              placeholder="Enter Medicine Type"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Price:</label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Enter Price"
+              required
+            />
+          </div>
+          <button className="submit-btn" type="submit">Add</button>
+        </form>
 
-        <div className="form-group-half">
-          <label>Full Name:</label>
-          <input type="text" name="fullName" value={doctor.fullName} onChange={handleChange} required />
-        </div>
+        {message && <div className="message">{message}</div>}
 
-        <div className="form-group-half">
-          <label>Gender:</label>
-          <input type="text" name="gender" value={doctor.gender} onChange={handleChange} required />
+        <div className="image-container">
+          <img src={AddmediImage} alt="Add Medicine" className="Addmedicine"/>
         </div>
-
-        <div className="form-group-half">
-          <label>Hospital:</label>
-          <input type="text" name="hospital" value={doctor.hospital} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Specialization:</label>
-          <input name="specialization" value={doctor.specialization} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Date of Birth:</label>
-          <input type="date" name="dob" value={doctor.dob} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Email:</label>
-          <input type="email" name="email" value={doctor.email} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>NIC:</label>
-          <input type="text" name="nic" value={doctor.nic} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>User Name:</label>
-          <input type="text" name="UserName" value={doctor.UserName} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Password:</label>
-          <input type="password" name="password" value={doctor.password} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Phone Number:</label>
-          <input type="tel" name="phoneNumber" value={doctor.phoneNumber} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Status:</label>
-          <input type="text" name="status" value={doctor.status} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group-full">
-          <label>Biography:</label>
-          <textarea name="biography" value={doctor.biography} onChange={handleChange} rows="3" required />
-        </div>
-
-        <div className="form-group-half">
-          <label>Designation:</label>
-          <input type="text" name="designation" value={doctor.designation} onChange={handleChange} required />
-        </div>
-
-        <div className="button-container">
-          <button type="submit" className="submit-button">Register</button>
-        </div>
-      </form>
-
-      {message.text && (
-        <div className={`message ${message.type}`}>{message.text}</div>
-      )}
+      </div>
     </div>
   );
-};
+}
 
-export default NewDoctor;
+export default AddMedicine;

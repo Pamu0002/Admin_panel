@@ -81,3 +81,21 @@
     color: red; /* Updated to match the image */
     font-weight: bold;
 }
+.back-button {
+    background-color: #2AA390; /* Bootstrap primary color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 20px 30px;
+    cursor: pointer;
+    font-size: 22px;
+    position: absolute; /* Positioning */
+    bottom: 60px; /* Distance from the bottom */
+    right: 100px; /* Distance from the right */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow */
+  }
+  
+  .back-button:hover {
+    background-color: #2AA390; /* Darker shade on hover */
+  }
+  

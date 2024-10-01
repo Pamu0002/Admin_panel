@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import { db } from '../firebase-config'; // Adjust the import path as needed
 import { doc, getDoc } from 'firebase/firestore';
 import './DoctorDetails.css'; // Import the CSS file
+import AdddocImage from '../assets/images/Pabhashini.png'; // Ensure the image path is correct
 
 const DoctorDetails = () => {
   const { doctorId } = useParams(); // Retrieve doctorId from URL
   const [doctor, setDoctor] = useState(null);
+  const [loading, setLoading] = useState(true); // Add a loading state
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchDoctorDetails = async () => {
@@ -21,14 +24,24 @@ const DoctorDetails = () => {
         }
       } catch (error) {
         console.error('Error fetching doctor details:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
     fetchDoctorDetails();
   }, [doctorId]);
 
-  if (!doctor) {
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
+
+  if (loading) {
     return <div>Loading...</div>; // Loading state
+  }
+
+  if (!doctor) {
+    return <div>No doctor found.</div>; // Handle case where doctor is not found
   }
 
   return (
@@ -39,10 +52,7 @@ const DoctorDetails = () => {
       </div>
       <div className="doctor-info-content">
         <div className="doctor-info-left">
-          {/* Display the doctor's photo */}
-          {doctor.photoUrl && (
-            <img src={doctor.photoUrl} alt={doctor.fullName} className="doctor-photo" />
-          )}
+          <img src={AdddocImage} alt="Doctor" className="doctor-image" />
           <h3 className="doctor-name">{doctor.fullName}</h3>
           <p className="doctor-specialization">{doctor.specialization}</p>
           <div className="social-icons">
@@ -53,12 +63,9 @@ const DoctorDetails = () => {
           </div>
         </div>
         <div className="doctor-info-right">
-          {/* Display the doctorId from URL */}
           <p><span className="info-label">Doctor Id:</span> {doctorId}</p>
           <p><span className="info-label">Name:</span> {doctor.fullName}</p>
           <p><span className="info-label">Gender:</span> {doctor.gender}</p>
-          {/* Display the correct password */}
-          <p><span className="info-label">Password:</span> {doctor.password}</p>
           <p><span className="info-label">Email:</span> {doctor.email}</p>
           <p><span className="info-label">Phone Number:</span> {doctor.phoneNumber}</p>
           <p><span className="info-label">Date of Birth:</span> {doctor.dob}</p>
@@ -69,6 +76,9 @@ const DoctorDetails = () => {
           <p><span className="info-label">Biography:</span> {doctor.biography}</p>
         </div>
       </div>
+      <button onClick={handleBack} className="back-button">
+        Back
+      </button> {/* Back button */}
     </div>
   );
 };

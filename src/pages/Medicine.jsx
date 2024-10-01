@@ -106,6 +106,7 @@ function Medicine() {
           <thead>
             <tr>
               <th>ID</th>
+              
               <th>Medicine Name</th>
               <th>Medicine Type</th>
               <th>Brand Name</th>
