@@ -1,12 +1,11 @@
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { db } from '../firebase-config';
 import './NewDoctor.css';
 
 const NewDoctor = () => {
   const [doctor, setDoctor] = useState({
-    id: '',  // Manual input for Doctor ID
+    id: '', // Doctor Id field added here
     fullName: '',
     gender: '',
     hospital: '',
@@ -19,11 +18,9 @@ const NewDoctor = () => {
     phoneNumber: '',
     status: '',
     biography: '',
-    designation: '',
-    photo: ''
+    designation: ''
   });
 
-  const [photoFile, setPhotoFile] = useState(null); // To store the file
   const [message, setMessage] = useState({
     text: '',
     type: ''
@@ -33,30 +30,21 @@ const NewDoctor = () => {
     setDoctor({ ...doctor, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
-    setPhotoFile(e.target.files[0]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Upload the photo if a file is selected
-      let photoURL = '';
-      if (photoFile) {
-        const storage = getStorage();
-        const photoRef = ref(storage, `doctor_photos/${photoFile.name}`);
-        await uploadBytes(photoRef, photoFile);
-        photoURL = await getDownloadURL(photoRef); // Get the photo URL after upload
-      }
+      const doctorId = doctor.id;
 
-      // Add doctor details to Firestore, including the manually entered ID and photo URL
-      const doctorRef = doc(db, 'Doctors', doctor.id);
-      await setDoc(doctorRef, { ...doctor, photo: photoURL });
+      // Create a document in Firestore with the provided doctor Id
+      const doctorRef = doc(db, 'Doctors', doctorId);
+      await setDoc(doctorRef, { ...doctor });
 
       setMessage({ text: 'Doctor added successfully!', type: 'success' });
+
+      // Reset form fields after submission
       setDoctor({
-        id: '',  // Reset Doctor ID after submission
+        id: '',
         fullName: '',
         gender: '',
         hospital: '',
@@ -69,13 +57,11 @@ const NewDoctor = () => {
         phoneNumber: '',
         status: '',
         biography: '',
-        designation: '',
-        photo: ''
+        designation: ''
       });
-      setPhotoFile(null);
 
     } catch (error) {
-      console.error('Error details:', error.message);
+      console.error('Error adding doctor:', error.message);
       setMessage({ text: 'Error adding doctor. Please try again.', type: 'error' });
     }
   };
@@ -84,8 +70,7 @@ const NewDoctor = () => {
     <div className="form-container">
       <h2>Register a Doctor</h2>
       <form className="doctor-form" onSubmit={handleSubmit}>
-
-        {/* Manual input field for Doctor ID */}
+        
         <div className="form-group-half">
           <label>Doctor Id:</label>
           <input type="text" name="id" value={doctor.id} onChange={handleChange} required />
@@ -154,12 +139,6 @@ const NewDoctor = () => {
         <div className="form-group-half">
           <label>Designation:</label>
           <input type="text" name="designation" value={doctor.designation} onChange={handleChange} required />
-        </div>
-
-        {/* New field for photo */}
-        <div className="form-group-half">
-          <label>Photo:</label>
-          <input type="file" onChange={handleFileChange} />
         </div>
 
         <div className="button-container">

@@ -23,7 +23,7 @@ const SideBar = () => {
         <li><Link to="/patient-appointment"><FaCalendarCheck className="icon" /> Patient Appointment</Link></li>
         <li><Link to="/doctor-schedule"><FaCalendarAlt className="icon" /> Doctor Schedule</Link></li>
         <li><Link to="/prescription"><FaFileAlt className="icon" /> Prescription</Link></li>
-        <li><Link to="/logout"><FaSignOutAlt className="icon" /> Log Out</Link></li>
+       
     </ul>
 </div>
 

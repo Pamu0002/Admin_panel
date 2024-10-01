@@ -39,9 +39,12 @@ const DoctorDetails = () => {
       </div>
       <div className="doctor-info-content">
         <div className="doctor-info-left">
-          <img src={doctor.photoUrl} alt={doctor.fullName} className="doctor-photo" />
+          {/* Display the doctor's photo */}
+          {doctor.photoUrl && (
+            <img src={doctor.photoUrl} alt={doctor.fullName} className="doctor-photo" />
+          )}
           <h3 className="doctor-name">{doctor.fullName}</h3>
-          <p className="doctor-department">{doctor.department}</p>
+          <p className="doctor-specialization">{doctor.specialization}</p>
           <div className="social-icons">
             {/* Replace # with actual links if available */}
             <a href="#"><i className="fab fa-facebook"></i></a>
@@ -50,18 +53,20 @@ const DoctorDetails = () => {
           </div>
         </div>
         <div className="doctor-info-right">
+          {/* Display the doctorId from URL */}
+          <p><span className="info-label">Doctor Id:</span> {doctorId}</p>
           <p><span className="info-label">Name:</span> {doctor.fullName}</p>
-          <p><span className="info-label">Address:</span> {doctor.address}</p>
-          <p><span className="info-label">Email:</span> {doctor.email}</p>
-          <p><span className="info-label">Phone:</span> {doctor.phoneNumber}</p>
           <p><span className="info-label">Gender:</span> {doctor.gender}</p>
-          <p><span className="info-label">Biography:</span> {doctor.biography}</p>
+          {/* Display the correct password */}
+          <p><span className="info-label">Password:</span> {doctor.password}</p>
+          <p><span className="info-label">Email:</span> {doctor.email}</p>
+          <p><span className="info-label">Phone Number:</span> {doctor.phoneNumber}</p>
           <p><span className="info-label">Date of Birth:</span> {doctor.dob}</p>
-          <p><span className="info-label">Department:</span> {doctor.department}</p>
-          <p><span className="info-label">Specialist:</span> {doctor.specialization}</p>
-          <p><span className="info-label">Blood Group:</span> {doctor.bloodGroup}</p>
-          <p><span className="info-label">Designation:</span> {doctor.designation}</p>
+          <p><span className="info-label">NIC:</span> {doctor.nic}</p>
+          <p><span className="info-label">Username:</span> {doctor.UserName}</p>
           <p><span className="info-label">Status:</span> <span className="active-status">{doctor.status}</span></p>
+          <p><span className="info-label">Designation:</span> {doctor.designation}</p>
+          <p><span className="info-label">Biography:</span> {doctor.biography}</p>
         </div>
       </div>
     </div>

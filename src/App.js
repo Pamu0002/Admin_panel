@@ -1,21 +1,22 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom'; 
+import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
-import Dashboard from './pages/Dashboard';
-import Doctors from './pages/Doctors';
-import NewDoctor from './pages/NewDoctor'; 
-import DoctorDetails from './pages/DoctorDetails'; // Import DoctorDetails component
-import Patients from './pages/Patients';
 import AddNewPatient from './pages/AddNewPatient';
-import Medicine from './pages/Medicine';
-import PatientAppointment from './pages/PatientAppointment';
-import DoctorSchedule from './pages/DoctorSchedule';
 import AddSchedule from './pages/AddSchedule';
-import Prescription from './pages/Prescription';
-import Login from './pages/login'; 
-import Signup from './pages/Signup'; 
+import Dashboard from './pages/Dashboard';
+import DoctorDetails from './pages/DoctorDetails'; // Import DoctorDetails component
+import Doctors from './pages/Doctors';
+import DoctorSchedule from './pages/DoctorSchedule';
+import Login from './pages/login';
 import Logout from './pages/logout';
+import Medicine from './pages/Medicine';
+import NewDoctor from './pages/NewDoctor';
+import PatientAppointment from './pages/PatientAppointment';
+import Patients from './pages/Patients';
+import Prescription from './pages/Prescription';
+import Signup from './pages/Signup';
+import AddMedicine from './pages/AddMedicine'; // Import AddMedicine component
 
 function AppContent() {
     const location = useLocation();
@@ -37,6 +38,7 @@ function AppContent() {
                         <Route path="/patients" element={<Patients />} />
                         <Route path="/addnewpatient" element={<AddNewPatient />} />
                         <Route path="/medicine" element={<Medicine />} />
+                        <Route path="/add-medicine" element={<AddMedicine />} /> {/* Route for AddMedicine */}
                         <Route path="/patient-appointment" element={<PatientAppointment />} />
                         <Route path="/doctor-schedule" element={<DoctorSchedule />} />
                         <Route path="/add-schedule" element={<AddSchedule />} />
