@@ -14,6 +14,7 @@ import Medicine from './pages/Medicine';
 import NewDoctor from './pages/NewDoctor';
 import PatientAppointment from './pages/PatientAppointment';
 import Patients from './pages/Patients';
+import PatientInfo from './pages/PatientInfo'; // Import PatientInfo component
 import Prescription from './pages/Prescription';
 import Signup from './pages/Signup';
 import AddMedicine from './pages/AddMedicine'; // Import AddMedicine component
@@ -44,6 +45,7 @@ function AppContent() {
                         <Route path="/add-schedule" element={<AddSchedule />} />
                         <Route path="/prescription" element={<Prescription />} />
                         <Route path="/logout" element={<Logout />} />
+                        <Route path="/patient/:id" element={<PatientInfo />} /> {/* Route for PatientInfo */}
                         <Route path="/" element={<Navigate to="/login" />} />
                     </Routes>
                 </div>

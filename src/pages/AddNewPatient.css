@@ -1,144 +1,63 @@
 .add-new-patient-container {
-    max-width: 600px; /* Maximum width for the container */
-    margin: 20px auto; /* Center the container with auto margin */
-    padding: 20px; /* Add some padding */
-    border: 1px solid #ccc; /* Light gray border */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    background-color: #f9f9f9; /* Light background color */
-}
-
-h2 {
-    text-align: center; /* Center the heading */
-    color: #333; /* Darker color for the heading */
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .form-group {
-    margin-bottom: 15px; /* Space between form groups */
+  margin-bottom: 15px;
 }
 
-.label {
-    display: block; /* Block display for labels */
-    margin-bottom: 5px; /* Space below labels */
-    font-weight: bold; /* Bold text for labels */
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="date"],
-select {
-    width: 100%; /* Full width inputs */
-    padding: 10px; /* Padding inside inputs */
-    border: 1px solid #ccc; /* Light gray border for inputs */
-    border-radius: 4px; /* Rounded corners for inputs */
-    font-size: 16px; /* Font size for inputs */
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="date"]:focus,
-select:focus {
-    border-color: #66afe9; /* Change border color on focus */
-    outline: none; /* Remove default outline */
+input, select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 .register-button {
-    width: 100%; /* Full width button */
-    padding: 10px; /* Padding inside button */
-    background-color: #5cb85c; /* Green background */
-    color: white; /* White text */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    font-size: 16px; /* Font size for button */
-    cursor: pointer; /* Pointer cursor on hover */
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  display: inline-block;
 }
 
 .register-button:hover {
-    background-color: #4cae4c; /* Darker green on hover */
+  background-color: #218838;
 }
 
 .message {
-    margin-top: 15px; /* Space above messages */
-    padding: 10px; /* Padding inside message box */
-    border: 1px solid transparent; /* Invisible border */
-    border-radius: 4px; /* Rounded corners for message */
-    color: #fff; /* White text */
-    background-color: #dff0d8; /* Light green background for success */
+  margin-top: 20px;
+  font-weight: bold;
+  color: green;
 }
 
-h3 {
-    margin-top: 30px; /* Space above patient list heading */
-    color: #333; /* Darker color for the heading */
+.back-button {
+  position: absolute;
+  bottom: 50px;
+  right: 10px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-ul {
-    list-style-type: none; /* Remove default list styling */
-    padding: 0; /* Remove default padding */
-}
-
-li {
-    padding: 8px; /* Padding for each list item */
-    border-bottom: 1px solid #ddd; /* Light gray border between list items */
-}
-
-li:last-child {
-    border-bottom: none; /* Remove border from the last item */
-}
-.add-new-patient-container {
-  max-width: 600px; /* Set maximum width for the container */
-  margin: 0 auto; /* Center the container */
-  padding: 20px; /* Add some padding */
-  background-color: #f9f9f9; /* Light background color */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-}
-
-.form-group {
-  display: flex; /* Use flexbox for horizontal layout */
-  align-items: center; /* Center items vertically */
-  margin-bottom: 15px; /* Space between form groups */
-}
-
-.form-group label {
-  width: 150px; /* Set a fixed width for labels */
-  margin-right: 10px; /* Space between label and input */
-  font-weight: bold; /* Bold text for labels */
-}
-
-input[type="text"],
-input[type="email"],
-input[type="date"],
-select {
-  flex: 1; /* Allow inputs to take up remaining space */
-  padding: 8px; /* Add padding inside input fields */
-  border: 1px solid #ccc; /* Light border for inputs */
-  border-radius: 4px; /* Rounded corners for inputs */
-}
-
-.register-button {
-  background-color: #4CAF50; /* Green background color */
-  color: white; /* White text color */
-  padding: 10px 15px; /* Padding for button */
-  border: none; /* Remove border */
-  border-radius: 4px; /* Rounded corners for button */
-  cursor: pointer; /* Change cursor to pointer on hover */
-}
-
-.register-button:hover {
-  background-color: #45a049; /* Darker green on hover */
-}
-
-.message {
-  margin-top: 10px; /* Space above message */
-  color: green; /* Green color for success messages */
-}
-
-ul {
-  list-style-type: none; /* Remove bullets from list */
-  padding: 0; /* Remove padding */
-}
-
-ul li {
-  padding: 5px 0; /* Space between list items */
-  border-bottom: 1px solid #ddd; /* Bottom border for list items */
+.back-button:hover {
+  background-color: #0056b3;
 }

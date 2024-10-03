@@ -1,66 +1,80 @@
+.container {
+  width: 80%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+/* General container styling */
 .patient-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  margin-left: 10px; /* Reduced margin to move the header more to the left */
 }
 
+/* Button for adding patients */
 .add-patient-button {
-  background-color: #4CAF50;
+  background-color: #4CAF50; /* Green background */
   color: white;
   border: none;
   padding: 10px 20px;
-  cursor: pointer;
   font-size: 16px;
+  cursor: pointer;
   border-radius: 5px;
 }
 
 .add-patient-button:hover {
-  background-color: #45a049;
+  background-color: #45a049; /* Darker green on hover */
 }
 
+/* Table styling */
 .patient-table {
-  width: calc(100% - 30px); /* Slightly reduced width to keep table layout consistent */
+  width: 100%;
   border-collapse: collapse;
-  margin-left: 10px; /* Adjusted margin to align with the header */
+  
 }
 
 .patient-table th, .patient-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  padding: 20px 50px;
   text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
 .patient-table th {
   background-color: #f2f2f2;
+  font-weight: bold;
 }
 
+.patient-table tr:hover {
+  background-color: #f5f5f5; /* Row hover effect */
+}
+
+/* Action buttons (View, Edit, Delete) */
 .action-button {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: transparent;
   border: none;
-  padding: 8px;
-  margin: 0 5px;
   cursor: pointer;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  margin-right: 10px;
 }
 
 .action-button.view {
-  color: #4CAF50;  /* Green color for view */
+  color: #3498db; /* Blue for view */
 }
 
 .action-button.delete {
-  color: #f44336;  /* Red color for delete */
+  color: #e74c3c; /* Red for delete */
 }
 
 .action-button.edit {
-  color: #008CBA;  /* Blue color for edit */
+  color: #f39c12; /* Orange for edit */
 }
 
 .action-button:hover {
-  background-color: #e0e0e0;
+  opacity: 0.7; /* Slight transparency on hover */
 }
