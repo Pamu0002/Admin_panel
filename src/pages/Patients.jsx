@@ -1,81 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link for navigation
-import { db } from '../firebase-config'; // Import your Firebase configuration
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'; // Import necessary Firestore functions
-import { FaEye, FaTrash, FaEdit } from 'react-icons/fa'; // Import icons from react-icons
-import './Patients.css'; // Import your CSS styles
+import { useNavigate, Link } from 'react-router-dom';
+import { db } from '../firebase-config';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { FaEye, FaTrash, FaEdit } from 'react-icons/fa';
+import './Patients.css';
 
 const Patients = () => {
-  const navigate = useNavigate(); // Using useNavigate hook
-  const [patients, setPatients] = useState([]); // State to hold all patient data
+  const navigate = useNavigate();
+  const [patients, setPatients] = useState([]);
 
   const navigateToAddPatient = () => {
-    navigate('/addnewpatient'); // Navigate to AddNewPatient page
+    navigate('/addnewpatient');
   };
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const patientCollection = collection(db, 'Patients'); // Reference to the 'Patients' collection
-        const patientSnapshot = await getDocs(patientCollection); // Fetch documents
+        const patientCollection = collection(db, 'Patients');
+        const patientSnapshot = await getDocs(patientCollection);
         const patientList = patientSnapshot.docs.map(doc => ({
           referenceNo: doc.id,
           ...doc.data(),
         }));
-        setPatients(patientList); // Set the fetched data to state
+        setPatients(patientList);
       } catch (error) {
-        console.error('Error fetching patients:', error); // Handle any errors
+        console.error('Error fetching patients:', error);
       }
     };
 
-    fetchPatients(); // Call the function to fetch patients
-  }, []); // Empty dependency array to run effect once on mount
+    fetchPatients();
+  }, []);
 
-  // Function to delete a patient
   const handleDeletePatient = async (id) => {
     try {
-      await deleteDoc(doc(db, 'Patients', id)); // Delete document from Firestore
-      setPatients(patients.filter(patient => patient.referenceNo !== id)); // Remove from state
+      await deleteDoc(doc(db, 'Patients', id));
+      setPatients(patients.filter(patient => patient.referenceNo !== id));
     } catch (error) {
-      console.error('Error deleting patient:', error); // Handle any errors
+      console.error('Error deleting patient:', error);
     }
   };
 
   return (
-    <div>
+    <div className="container">
       <div className="patient-header">
         <button className="add-patient-button" onClick={navigateToAddPatient}>
-          + Add Patient
+          Add Patients +
         </button>
-        <h2>Patients</h2> {/* Updated heading */}
+        <h2>Patients list</h2>
       </div>
+      <div className="table-container">
       <table className="patient-table">
         <thead>
           <tr>
-            <th>Reference No</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>NIC</th>
-            <th>Actions</th>
+            <th>Reference No</th> {/* Updated Header */}
+            <th>Name</th> {/* Updated Header */}
+            <th>Email</th> {/* Updated Header */}
+            <th>Phone Number</th> {/* Updated Header */}
+            <th>Address</th> {/* Updated Header */}
+            <th>NIC</th> {/* New Header for NIC */}
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {patients.map((patient) => (
             <tr key={patient.referenceNo}>
-              <td>{patient.referenceNo}</td>
+              <td>{patient.referenceNo}</td> {/* Reference No */}
+              <td>{patient.name}</td> {/* Name */}
+              <td>{patient.email}</td> {/* Email */}
+              <td>{patient.phone}</td> {/* Phone Number */}
+              <td>{patient.address}</td> {/* Address */}
+              <td>{patient.nic}</td> {/* NIC */}
               <td>
-                <Link to={`/patient/${patient.referenceNo}`}>{patient.name}</Link> {/* Link to patient details */}
-              </td>
-              <td>{patient.email}</td>
-              <td>{patient.phone}</td>
-              <td>{patient.address}</td>
-              <td>{patient.nic}</td>
-              <td>
-                <button className="action-button view">
-                  <FaEye />
-                </button>
+                <Link to={`/patient/${patient.referenceNo}`}>
+                  
+                </Link>
                 <button className="action-button delete" onClick={() => handleDeletePatient(patient.referenceNo)}>
                   <FaTrash />
                 </button>
@@ -87,6 +85,7 @@ const Patients = () => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 };
