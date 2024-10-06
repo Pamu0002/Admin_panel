@@ -6,7 +6,9 @@ import '../pages/Doctor.css';
 
 const Doctors = () => {
   const navigate = useNavigate();
-  const [doctors, setDoctors] = useState([]);
+  const [doctors, setDoctors] = useState([]); // Original list of doctors
+  const [filteredDoctors, setFilteredDoctors] = useState([]); // Filtered list of doctors for search
+  const [searchTerm, setSearchTerm] = useState(''); // State for search input
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -17,15 +19,15 @@ const Doctors = () => {
         const doctorsData = snapshot.docs.map(doc => ({
           id: doc.id,
           doctorId: doc.data().id || '', // Accessing the manual Doctor Id
-          name: doc.data().fullName || '',
+          name: doc.data().doctorName || '', // Changed from fullName to doctorName
           email: doc.data().email || '',
           phone: doc.data().phoneNumber || '',
           specialization: doc.data().specialization || '',
           status: doc.data().status || 'Inactive'
         }));
 
-        console.log("Fetched doctors data:", doctorsData);
-        setDoctors(doctorsData);
+        setDoctors(doctorsData); // Set the original list of doctors
+        setFilteredDoctors(doctorsData); // Initialize the filtered list with the full data
       } catch (error) {
         console.error("Error fetching doctors: ", error);
       }
@@ -40,10 +42,13 @@ const Doctors = () => {
 
   const toggleStatus = async (id, currentStatus) => {
     try {
-      const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active'; // Corrected the logic to set new status
+      const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
       const doctorRef = doc(db, 'Doctors', id);
       await updateDoc(doctorRef, { status: newStatus });
       setDoctors(doctors.map(doctor =>
+        doctor.id === id ? { ...doctor, status: newStatus } : doctor
+      ));
+      setFilteredDoctors(filteredDoctors.map(doctor =>
         doctor.id === id ? { ...doctor, status: newStatus } : doctor
       ));
     } catch (error) {
@@ -56,11 +61,22 @@ const Doctors = () => {
     if (confirmDelete) {
       try {
         await deleteDoc(doc(db, 'Doctors', id));
-        setDoctors(doctors.filter(doctor => doctor.id !== id)); // Remove the deleted doctor from state
+        setDoctors(doctors.filter(doctor => doctor.id !== id));
+        setFilteredDoctors(filteredDoctors.filter(doctor => doctor.id !== id));
       } catch (error) {
         console.error("Error deleting doctor: ", error);
       }
     }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+
+    // Filter doctors based on the search term
+    const searchResult = doctors.filter(doctor => 
+      doctor.name.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    setFilteredDoctors(searchResult);
   };
 
   return (
@@ -68,32 +84,41 @@ const Doctors = () => {
       <div className="header">
         <button className="add-doctor" onClick={handleAddDoctor}>+ Add Doctor</button>
         <div className="breadcrumb">
-          <span>Dashboard</span> {'>'} <span>Doctor List</span>
+          <span>Dashboard</span> {'>'}
+        </div>
+        <div className="breadcrumbs">
+          <span>Doctor List</span>
         </div>
       </div>
       <div className="doctor-list">
         <div className="doctor-list-header">
           <h2>Doctor List</h2>
           <div className="filter-container">
-            <input type="text" placeholder="Search" className="filter-input" />
+            <input
+              type="text"
+              placeholder="Search by name"
+              className="filter-input"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
           </div>
         </div>
         <table className="doctor-table">
           <thead>
             <tr>
               <th>Doctor Id</th>
-              <th>Full Name</th>
+              <th>Doctor Name</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Specialization</th>
               <th>Status</th>
-              <th>Actions</th> {/* New column for actions */}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {doctors.map(doctor => (
+            {filteredDoctors.map(doctor => (
               <tr key={doctor.id}>
-                <td>{doctor.doctorId}</td> {/* Displaying the manual Doctor Id */}
+                <td>{doctor.doctorId}</td>
                 <td><Link to={`/doctor/${doctor.id}`}>{doctor.name}</Link></td>
                 <td>{doctor.email}</td>
                 <td>{doctor.phone}</td>
@@ -117,7 +142,6 @@ const Doctors = () => {
                   </div>
                 </td>
                 <td>
-                  {/* New Delete Button */}
                   <button
                     className="delete-button"
                     onClick={() => handleDeleteDoctor(doctor.id)}

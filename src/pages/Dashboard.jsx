@@ -19,7 +19,7 @@ const Dashboard = () => {
                 setDoctorCount(doctorsSnapshot.size); // Count of doctors
 
                 // Fetch Patients Data
-                const usersCollection = collection(db, 'user'); // Assuming the collection is named 'user'
+                const usersCollection = collection(db, 'Patients'); // Assuming the collection is named 'user'
                 const usersSnapshot = await getDocs(usersCollection);
 
                 // Process patient data for the bar chart

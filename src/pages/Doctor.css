@@ -37,6 +37,11 @@
 .breadcrumb {
   font-size: 14px;
   color: gray;
+  margin-right: 20px;
+}
+.breadcrumbs {
+  font-size: 14px;
+  color: red;
 }
 
 .doctor-list {

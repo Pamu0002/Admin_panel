@@ -7,7 +7,7 @@ import './NewDoctor.css';
 const NewDoctor = () => {
   const [doctor, setDoctor] = useState({
     id: '',  // Manual input for Doctor ID
-    fullName: '',
+    doctorName: '',  // Changed from fullName to doctorName
     gender: '',
     hospital: '',
     specialization: '',
@@ -50,14 +50,14 @@ const NewDoctor = () => {
         photoURL = await getDownloadURL(photoRef); // Get the photo URL after upload
       }
 
-      // Add doctor details to Firestore, including the manually entered ID and photo URL
+      // Add doctor details to Firestore, including the manually entered ID, doctorName, and photo URL
       const doctorRef = doc(db, 'Doctors', doctor.id);
-      await setDoc(doctorRef, { ...doctor, photo: photoURL });
+      await setDoc(doctorRef, { ...doctor, doctorName: doctor.doctorName, photo: photoURL });
 
       setMessage({ text: 'Doctor added successfully!', type: 'success' });
       setDoctor({
         id: '',  // Reset Doctor ID after submission
-        fullName: '',
+        doctorName: '',  // Reset doctorName
         gender: '',
         hospital: '',
         specialization: '',
@@ -92,8 +92,8 @@ const NewDoctor = () => {
         </div>
 
         <div className="form-group-half">
-          <label>Full Name:</label>
-          <input type="text" name="fullName" value={doctor.fullName} onChange={handleChange} required />
+          <label>Doctor Name:</label> {/* Changed label from Full Name to Doctor Name */}
+          <input type="text" name="doctorName" value={doctor.doctorName} onChange={handleChange} required />
         </div>
 
         <div className="form-group-half">

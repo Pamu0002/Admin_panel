@@ -1,8 +1,5 @@
-.container {
-    width: 80%;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-  }
+
+  
   
   .header {
     display: flex;
@@ -33,8 +30,9 @@
   
   .table-container {
     background-color: #f2f5f7;
-    padding: 20px;
+    padding: 5px;
     border-radius: 8px;
+    width: 80%;
   }
   
   .medicine-table {

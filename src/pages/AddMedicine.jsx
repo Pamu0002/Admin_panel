@@ -3,8 +3,10 @@ import './AddMedicine.css'; // CSS file for AddMedicine styling
 import AddmediImage from '../assets/images/Addmedicine.png';
 import { db } from '../firebase-config'; // Make sure you import your Firebase config
 import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function AddMedicine() {
+  const navigate = useNavigate(); // Initialize useNavigate
   const [medicineId, setMedicineId] = useState('');
   const [medicineName, setMedicineName] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -34,6 +36,10 @@ function AddMedicine() {
       setBrandName('');
       setMedicineType('');
       setPrice('');
+
+      // Navigate to the medicine table page
+      navigate('/medicine'); // Replace '/medicine' with the correct path to your medicine table
+
     } catch (error) {
       console.error('Error adding medicine:', error);
       setMessage('Failed to add medicine. Please check the console for details.');

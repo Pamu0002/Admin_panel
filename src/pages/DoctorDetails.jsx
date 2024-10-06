@@ -64,7 +64,7 @@ const DoctorDetails = () => {
         </div>
         <div className="doctor-info-right">
           <p><span className="info-label">Doctor Id:</span> {doctorId}</p>
-          <p><span className="info-label">Name:</span> {doctor.fullName}</p>
+          <p><span className="info-label">Doctor Name:</span> {doctor.fullName}</p>
           <p><span className="info-label">Gender:</span> {doctor.gender}</p>
           <p><span className="info-label">Email:</span> {doctor.email}</p>
           <p><span className="info-label">Phone Number:</span> {doctor.phoneNumber}</p>

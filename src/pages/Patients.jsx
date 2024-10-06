@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../firebase-config';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { FaEye, FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import './Patients.css';
 
 const Patients = () => {
   const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(''); // State to hold the search term
 
   const navigateToAddPatient = () => {
     navigate('/addnewpatient');
@@ -40,52 +41,67 @@ const Patients = () => {
     }
   };
 
+  // Filter patients based on the search term
+  const filteredPatients = patients.filter((patient) =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="container">
       <div className="patient-header">
         <button className="add-patient-button" onClick={navigateToAddPatient}>
           Add Patients +
         </button>
-        <h2>Patients list</h2>
+        <h2>Patients List</h2>
+        {/* Add search box */}
+        <input
+          className="search-box"
+          type="text"
+          placeholder="Search Patient by Name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Update search term on input change
+        />
       </div>
       <div className="table-container">
-      <table className="patient-table">
-        <thead>
-          <tr>
-            <th>Reference No</th> {/* Updated Header */}
-            <th>Name</th> {/* Updated Header */}
-            <th>Email</th> {/* Updated Header */}
-            <th>Phone Number</th> {/* Updated Header */}
-            <th>Address</th> {/* Updated Header */}
-            <th>NIC</th> {/* New Header for NIC */}
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map((patient) => (
-            <tr key={patient.referenceNo}>
-              <td>{patient.referenceNo}</td> {/* Reference No */}
-              <td>{patient.name}</td> {/* Name */}
-              <td>{patient.email}</td> {/* Email */}
-              <td>{patient.phone}</td> {/* Phone Number */}
-              <td>{patient.address}</td> {/* Address */}
-              <td>{patient.nic}</td> {/* NIC */}
-              <td>
-                <Link to={`/patient/${patient.referenceNo}`}>
-                  
-                </Link>
-                <button className="action-button delete" onClick={() => handleDeletePatient(patient.referenceNo)}>
-                  <FaTrash />
-                </button>
-                <button className="action-button edit">
-                  <FaEdit />
-                </button>
-              </td>
+        <table className="patient-table">
+          <thead>
+            <tr>
+              <th>Reference No</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Address</th>
+              <th>NIC</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {filteredPatients.map((patient) => (
+              <tr key={patient.referenceNo}>
+                <td>{patient.referenceNo}</td>
+                {/* Link the patient name to the detail page */}
+                <td>
+                  <Link to={`/patient/${patient.referenceNo}`} className="clickable">
+                    {patient.name}
+                  </Link>
+                </td>
+                <td>{patient.email}</td>
+                <td>{patient.phone}</td>
+                <td>{patient.address}</td>
+                <td>{patient.nic}</td>
+                <td>
+                  <button className="action-button delete" onClick={() => handleDeletePatient(patient.referenceNo)}>
+                    <FaTrash />
+                  </button>
+                  <button className="action-button edit">
+                    <FaEdit />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

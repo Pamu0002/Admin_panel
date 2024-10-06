@@ -21,8 +21,8 @@ function PatientAppointment() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Fetch specializations from Firebase
     useEffect(() => {
-        // Fetch all specializations
         const fetchSpecializations = async () => {
             try {
                 setLoading(true);
@@ -39,15 +39,18 @@ function PatientAppointment() {
         fetchSpecializations();
     }, []);
 
+    // Fetch doctors based on the selected specialization
     useEffect(() => {
-        // Fetch doctors based on selected specialization
         const fetchDoctors = async () => {
             if (selectedSpecialization) {
                 try {
                     setLoading(true);
                     const q = query(collection(db, 'Doctors'), where('specialization', '==', selectedSpecialization));
                     const snapshot = await getDocs(q);
-                    const doctorsData = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+                    const doctorsData = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        name: doc.data().fullName // Make sure the doctor name is stored as `fullName` in Firestore
+                    }));
                     setDoctors(doctorsData);
                 } catch (err) {
                     setError('Error fetching doctors');
@@ -62,58 +65,38 @@ function PatientAppointment() {
         fetchDoctors();
     }, [selectedSpecialization]);
 
+    // Fetch available time slots based on the doctor's name and date
     useEffect(() => {
-        // Fetch available time slots based on selected doctor's name and date
         const fetchAvailableTimeSlots = async () => {
             if (formData.doctorName && selectedDate) {
-                // Find doctor ID by name
-                const q = query(collection(db, 'Doctors'), where('name', '==', formData.doctorName));
+                const q = query(collection(db, 'Doctors'), where('fullName', '==', formData.doctorName));
                 const snapshot = await getDocs(q);
-    
+
                 if (!snapshot.empty) {
                     const doctorId = snapshot.docs[0].id;
                     const docRef = doc(db, 'schedule', doctorId);
                     const docSnap = await getDoc(docRef);
-    
+
                     if (docSnap.exists()) {
                         const visitingTimes = docSnap.data().visitingTime || [];
-    
-                        // Ensure visitingTimes is an array
-                        if (!Array.isArray(visitingTimes)) {
-                            console.error("visitingTime is not an array:", visitingTimes);
-                            setAvailableTimeSlots([]);
-                            return;
-                        }
-    
-                        console.log('Fetched visiting times:', visitingTimes);
-    
-                        // Convert selectedDate to Date object for comparison
+
                         const selectedDateObject = new Date(selectedDate);
                         const filteredSlots = visitingTimes.filter(time => {
                             const slotDate = new Date(time);
-                            return (
-                                slotDate.toDateString() === selectedDateObject.toDateString() &&
-                                slotDate > new Date()
-                            );
+                            return slotDate.toDateString() === selectedDateObject.toDateString() && slotDate > new Date();
                         });
-    
-                        console.log('Filtered time slots:', filteredSlots);
-    
-                        // Reduce time slots by 15 minutes
+
                         const adjustedSlots = filteredSlots.map(time => {
                             const slot = new Date(time);
                             slot.setMinutes(slot.getMinutes() - 15);
-                            return slot.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
+                            return slot.toISOString().slice(0, 16);
                         });
-    
-                        // Format slots for display
+
                         const formattedSlots = adjustedSlots.map(slot => {
                             const date = new Date(slot);
-                            return date.toLocaleString(); // Convert to a readable format
+                            return date.toLocaleString();
                         });
-    
-                        console.log('Formatted time slots:', formattedSlots);
-    
+
                         setAvailableTimeSlots(formattedSlots);
                     } else {
                         setAvailableTimeSlots([]);
@@ -125,10 +108,9 @@ function PatientAppointment() {
                 setAvailableTimeSlots([]);
             }
         };
-    
+
         fetchAvailableTimeSlots();
     }, [formData.doctorName, selectedDate]);
-    
 
     const handleSpecializationChange = (e) => {
         setSelectedSpecialization(e.target.value);
@@ -159,17 +141,13 @@ function PatientAppointment() {
         setSuccess('');
 
         try {
-            // Generate a unique ID for the new appointment
             const appointmentId = `appointment${Date.now()}`;
-
-            // Save the data to Firestore with the generated ID
             await setDoc(doc(db, 'appointments', appointmentId), {
                 ...formData,
                 timeSlot: selectedTimeSlot,
                 id: appointmentId
             });
 
-            // Send email (assuming you have an email sending function set up)
             await sendConfirmationEmail(formData.email, appointmentId, selectedTimeSlot);
 
             setSuccess('Appointment successfully added!');
@@ -194,7 +172,6 @@ function PatientAppointment() {
     };
 
     const sendConfirmationEmail = async (email, appointmentId, timeSlot) => {
-        // Implement your email sending logic here
         console.log(`Sending email to ${email} with appointment ID ${appointmentId} and time slot ${timeSlot}`);
     };
 
