@@ -1,0 +1,101 @@
+/* General container */
+.patient-info-wrapper {
+  width: 80%; /* Reduce width for smaller containers */
+  padding: 15px;
+  margin: 0 auto; /* Center align */
+  background-color: #f0f4f7;
+  font-family: 'Arial', sans-serif;
+}
+
+.breadcrumb {
+  font-size: 12px; /* Smaller breadcrumb text */
+  color: #888;
+  margin-bottom: 15px;
+}
+
+.breadcrumb .highlight {
+  color: red;
+}
+
+.patient-info-container {
+  display: flex;
+  flex-direction: row;
+  gap: 15px; /* Reduced gap between columns */
+}
+
+/* Left side - Patient card */
+.patient-card {
+  width: 25%; /* Smaller width for the patient card */
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.patient-avatar {
+  text-align: center;
+}
+
+.avatar-icon {
+  font-size: 50px; /* Reduced icon size */
+  color: #00a1f1;
+}
+
+.patient-avatar h3 {
+  margin-top: 10px;
+  font-size: 16px; /* Smaller font for the name */
+}
+
+/* Right side - Appointment Info */
+.appointment-info {
+  flex: 1;
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 18px; /* Reduced title font size */
+  color: #008000;
+  margin-bottom: 15px;
+}
+
+.appointment-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.left-column,
+.right-column {
+  width: 48%; /* Adjusted column width to fit more info */
+}
+
+.left-column p,
+.right-column p {
+  font-size: 14px; /* Smaller text for appointment details */
+  margin: 5px 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* Back button styling */
+.back-button {
+  padding: 8px 18px; /* Reduced padding for smaller button */
+  background-color: #00a1f1;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px; /* Smaller font size */
+}
+
+.back-button:hover {
+  background-color: #007bb5;
+}

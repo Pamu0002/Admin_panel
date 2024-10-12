@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './AddSchedule.css';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -17,33 +17,34 @@ const AddSchedule = () => {
         "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
     ];
 
+    // Fetch doctor details based on Doctor ID
     const fetchDoctorDetails = async (id) => {
         const db = getFirestore();
         try {
-            const docRef = doc(db, 'Doctors', id);
+            const docRef = doc(db, 'Doctors', id); // Firestore path to Doctor document
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                setDoctorName(data.name || '');
-                setSpecialization(data.specialization || '');
+                setDoctorName(data.name || ''); // Set doctor name
+                setSpecialization(data.specialization || ''); // Set specialization
             } else {
-                setDoctorName('');
-                setSpecialization('');
-                alert('Doctor not found.');
+                setDoctorName(''); // Clear name if not found
+                setSpecialization(''); // Clear specialization if not found
+                alert('Doctor not found.'); // Alert user if doctor is not found
             }
         } catch (error) {
             console.error('Error fetching doctor details: ', error);
-            alert('Failed to fetch doctor details.');
+            alert('Failed to fetch doctor details.'); // Alert user on error
         }
     };
 
     const handleDoctorIdChange = (e) => {
         const id = e.target.value;
-        setDoctorId(id);
+        setDoctorId(id); // Update state with Doctor ID
         if (id) {
-            fetchDoctorDetails(id);
+            fetchDoctorDetails(id); // Fetch doctor details if ID is provided
         } else {
-            setDoctorName('');
+            setDoctorName(''); // Clear doctor name and specialization if ID is empty
             setSpecialization('');
         }
     };
@@ -76,10 +77,10 @@ const AddSchedule = () => {
                 appointmentDate,
                 visitingTime
             });
-            alert('Appointment scheduled successfully!');
+            alert('Appointment scheduled successfully!'); // Alert on success
         } catch (error) {
             console.error('Error scheduling appointment: ', error);
-            alert('Failed to schedule appointment.');
+            alert('Failed to schedule appointment.'); // Alert on error
         }
     };
 

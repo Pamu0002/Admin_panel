@@ -1,13 +1,11 @@
-/* src/pages/Dashboard.css */
-
 :root {
-    --patients-bar-color: rgba(36, 54, 217, 0.551); /* Green for Patients */
-    --pending-bar-color: rgba(210, 180, 8, 0.401);  /* Orange for Pending */
+    --patients-bar-color: rgba(36, 54, 217, 0.551);
+    --pending-bar-color: rgba(210, 180, 8, 0.401);
 }
 
 .dashboard {
     display: flex;
-    flex-direction: column; /* Stack items vertically */
+    flex-direction: column;
     height: 100vh;
     background-color: rgba(255, 255, 255, 1);
     padding: 20px;
@@ -17,60 +15,163 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    margin-left: 2%;
+    margin-right: 2%;
 }
 
 .stat-item {
-    background-color: #e0e0e0; /* Default background */
+    background-color: #e0e0e0;
     padding: 20px;
     border-radius: 8px;
-    width: 250px; /* Adjusted width */
-    height: 80px;
-    text-align: right; /* Align text to the left */
+    width: 300px;
+    height: 150px;
+    text-align: right;
     display: flex;
-    align-items: center; /* Center items vertically */
-    gap: 80px; /* Space between icon and text */
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px; /* Add margin for spacing when stacked */
+}
+
+.count_txt {
+    font-size: 32px !important;    /* Increase the text size for doctor count */
+    font-weight: bold; /* Optionally make it bold */
+    color: #333; /* Optionally change the color */
+}
+
+.txt_Container_1 {
+    background-color: #08B2A0;
+    color: white; /* Set text color to white */
+    text-align: center; /* Center the text horizontally */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Horizontally center the content */
+    align-items: center; /* Vertically center the content */
+    height: 100%; /* Ensure full height centering if needed */
+    padding: 0 20px; /* Add padding of 20px to the left and right */
+    font-size: 18px!important; /* Increase the text size */
+    font-weight: bold; /* Optionally make it bold for emphasis */
+}
+
+.txt_Container_2 {
+    background-color: #3648E8;
+    color: white; /* Set text color to white */
+    text-align: center; /* Center the text horizontally */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Horizontally center the content */
+    align-items: center; /* Vertically center the content */
+    height: 100%; /* Ensure full height centering if needed */
+    padding: 0 20px; /* Add padding of 20px to the left and right */
+    font-size: 18px!important; /* Increase the text size */
+    font-weight: bold; /* Optionally make it bold for emphasis */
+}
+
+.txt_Container_3 {
+    background-color: #788089;
+    color: white; /* Set text color to white */
+    text-align: right; /* Center the text horizontally */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Horizontally center the content */
+    align-items: center; /* Vertically center the content */
+    height: 100%; /* Ensure full height centering if needed */
+    padding: 0 5px; /* Add padding of 20px to the left and right */
+    font-size: 18px!important; /* Increase the text size */
+    font-weight: bold; /* Optionally make it bold for emphasis */
+}
+
+.txt_Container_4 {
+    background-color: #FFD700;
+    color: white; /* Set text color to white */
+    text-align: center; /* Center the text horizontally */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Horizontally center the content */
+    align-items: center; /* Vertically center the content */
+    height: 100%; /* Ensure full height centering if needed */
+    padding: 0 20px; /* Add padding of 20px to the left and right */
+    font-size: 18px!important; /* Increase the text size */
+    font-weight: bold; /* Optionally make it bold for emphasis */
 }
 
 .stat-item svg {
-    margin: 0; /* Remove any margin for icons */
-    flex-shrink: 0; /* Prevent icon from shrinking */
+    margin: 0;
+    flex-shrink: 0;
 }
 
-/* Text styling within the stat-item */
 .stat-item div {
-    font-size: 14px; /* Adjust font size as needed */
-    font-weight: bold; /* Make text bold for emphasis */
-    line-height: 1.5; /* Adjust line height for spacing */
-    word-wrap: break-word; /* Ensure long words are wrapped */
-    overflow-wrap: break-word; /* Same as above for compatibility */
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-/* Different colors for each stat item */
 .stat-item.doctors {
-    background-color: rgba(8, 178, 160, 0.1); /* Yellow for Doctors */
+    background-color: rgba(8, 178, 160, 0.10);
 }
 
 .stat-item.patients {
-    background-color: rgba(54, 72, 232, 0.15); /* Green for Patients */
+    background-color: rgba(54, 72, 232, 0.15);
 }
 
 .stat-item.attended {
-    background-color: rgba(120, 128, 137, 0.15); /* Blue for Attended */
+    background-color: rgba(120, 128, 137, 0.15);
 }
 
 .stat-item.pending {
-    background-color: rgba(255, 215, 0, 0.16); /* Red for Pending */
+    background-color: rgba(255, 215, 0, 0.16);
 }
+
+img {
+    width: 100px;
+    height: 100px;
+ }
 
 .charts {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap; /* Ensure charts stack on smaller screens */
+    gap: 20px; /* Add space between charts */
 }
 
 .chart {
     background-color: #f5f5f5;
     padding: 20px;
     border-radius: 8px;
-    width: 45%; /* Adjust width to fit side-by-side */
+    width: 45%;
     height: 300px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1024px) {
+    .stat-item {
+        width: 45%; /* Take up half the screen width */
+    }
+
+    .chart {
+        width: 100%; /* Make charts full width */
+    }
+}
+
+@media (max-width: 768px) {
+    .stats {
+        flex-direction: column; /* Stack items vertically */
+    }
+
+    .stat-item {
+        width: 100%; /* Take up full width */
+    }
+
+    .charts {
+        flex-direction: column; /* Stack charts vertically */
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-item {
+        padding: 15px; /* Reduce padding for smaller screens */
+        gap: 30px; /* Reduce gap between icon and text */
+    }
+
+    .chart {
+        height: 250px; /* Reduce chart height for smaller screens */
+    }
 }

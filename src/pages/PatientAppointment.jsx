@@ -1,253 +1,169 @@
-import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from '../firebase-config'; // Ensure this path is correct
-import './PatientAppointment.css';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, deleteDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
+import { db } from '../firebase-config'; // Import Firebase config
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+import './PatientAppointment.css'; // Import the relevant CSS
 
-function PatientAppointment() {
-    const [specializations, setSpecializations] = useState([]);
-    const [selectedSpecialization, setSelectedSpecialization] = useState('');
-    const [doctors, setDoctors] = useState([]);
-    const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
-    const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
-    const [selectedDate, setSelectedDate] = useState('');
-    const [formData, setFormData] = useState({
-        doctorName: '',
-        patientName: '',
-        email: '',
-        phoneNumber: '',
-        nic: ''
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+const PatientAppointment = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate(); // Initialize the navigate function
 
-    // Fetch specializations from Firebase
-    useEffect(() => {
-        const fetchSpecializations = async () => {
-            try {
-                setLoading(true);
-                const snapshot = await getDocs(collection(db, 'Doctors'));
-                const specialties = [...new Set(snapshot.docs.map(doc => doc.data().specialization))];
-                setSpecializations(specialties);
-            } catch (err) {
-                setError('Error fetching specializations');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchSpecializations();
-    }, []);
-
-    // Fetch doctors based on the selected specialization
-    useEffect(() => {
-        const fetchDoctors = async () => {
-            if (selectedSpecialization) {
-                try {
-                    setLoading(true);
-                    const q = query(collection(db, 'Doctors'), where('specialization', '==', selectedSpecialization));
-                    const snapshot = await getDocs(q);
-                    const doctorsData = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        name: doc.data().fullName // Make sure the doctor name is stored as `fullName` in Firestore
-                    }));
-                    setDoctors(doctorsData);
-                } catch (err) {
-                    setError('Error fetching doctors');
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                setDoctors([]);
-            }
-        };
-
-        fetchDoctors();
-    }, [selectedSpecialization]);
-
-    // Fetch available time slots based on the doctor's name and date
-    useEffect(() => {
-        const fetchAvailableTimeSlots = async () => {
-            if (formData.doctorName && selectedDate) {
-                const q = query(collection(db, 'Doctors'), where('fullName', '==', formData.doctorName));
-                const snapshot = await getDocs(q);
-
-                if (!snapshot.empty) {
-                    const doctorId = snapshot.docs[0].id;
-                    const docRef = doc(db, 'schedule', doctorId);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists()) {
-                        const visitingTimes = docSnap.data().visitingTime || [];
-
-                        const selectedDateObject = new Date(selectedDate);
-                        const filteredSlots = visitingTimes.filter(time => {
-                            const slotDate = new Date(time);
-                            return slotDate.toDateString() === selectedDateObject.toDateString() && slotDate > new Date();
-                        });
-
-                        const adjustedSlots = filteredSlots.map(time => {
-                            const slot = new Date(time);
-                            slot.setMinutes(slot.getMinutes() - 15);
-                            return slot.toISOString().slice(0, 16);
-                        });
-
-                        const formattedSlots = adjustedSlots.map(slot => {
-                            const date = new Date(slot);
-                            return date.toLocaleString();
-                        });
-
-                        setAvailableTimeSlots(formattedSlots);
-                    } else {
-                        setAvailableTimeSlots([]);
-                    }
-                } else {
-                    setAvailableTimeSlots([]);
-                }
-            } else {
-                setAvailableTimeSlots([]);
-            }
-        };
-
-        fetchAvailableTimeSlots();
-    }, [formData.doctorName, selectedDate]);
-
-    const handleSpecializationChange = (e) => {
-        setSelectedSpecialization(e.target.value);
+  // Fetch all appointments from Firestore and order by appointmentNumber
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const appointmentCollection = collection(db, 'Appointments');
+        const appointmentQuery = query(appointmentCollection, orderBy('appointmentNumber', 'asc')); // Order by appointmentNumber
+        const appointmentSnapshot = await getDocs(appointmentQuery); // Fetch ordered appointments
+        const appointmentList = appointmentSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAppointments(appointmentList); // Set state with fetched data
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
     };
 
-    const handleDoctorChange = (e) => {
-        setFormData(prevState => ({ ...prevState, doctorName: e.target.value }));
-    };
+    fetchAppointments();
+  }, []);
 
-    const handleDateChange = (e) => {
-        setSelectedDate(e.target.value);
-    };
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
-    const handleTimeSlotClick = (slot) => {
-        setSelectedTimeSlot(slot);
-    };
+  // Handle appointment deletion
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this appointment?');
+    if (confirmDelete) {
+      try {
+        await deleteDoc(doc(db, 'Appointments', id)); // Delete appointment from Firestore
+        setAppointments(appointments.filter((appointment) => appointment.id !== id)); // Remove deleted appointment from state
+      } catch (error) {
+        console.error('Error deleting appointment:', error);
+      }
+    }
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({ ...prevState, [name]: value }));
-    };
+  // Generate the next appointment number
+  const getNextAppointmentNumber = () => {
+    if (appointments.length === 0) {
+      return 1; // Start from 1 if no appointments exist
+    }
+    // Get the highest appointmentNumber from current appointments
+    const highestAppointmentNumber = Math.max(...appointments.map((appointment) => parseInt(appointment.appointmentNumber, 10)));
+    return highestAppointmentNumber + 1; // Increment by 1
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  // Function to handle making a new appointment
+  const handleAddAppointment = async (doctorName, patientName, appointmentDate, visitingTime) => {
+    const nextAppointmentNumber = getNextAppointmentNumber(); // Generate next appointment number
 
-        setLoading(true);
-        setError('');
-        setSuccess('');
+    try {
+      const newAppointmentRef = await addDoc(collection(db, 'Appointments'), {
+        appointmentNumber: nextAppointmentNumber.toString(), // Store as string with the field name appointmentNumber
+        doctorName,
+        patientName,
+        appointmentDate,
+        visitingTime,
+      });
 
-        try {
-            const appointmentId = `appointment${Date.now()}`;
-            await setDoc(doc(db, 'appointments', appointmentId), {
-                ...formData,
-                timeSlot: selectedTimeSlot,
-                id: appointmentId
-            });
+      // Add the new appointment to the state
+      setAppointments((prevAppointments) => [
+        ...prevAppointments,
+        {
+          id: newAppointmentRef.id, // Firebase document ID for future operations
+          appointmentNumber: nextAppointmentNumber.toString(), // Display appointment number
+          doctorName,
+          patientName,
+          appointmentDate,
+          visitingTime,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error making appointment:', error);
+    }
+  };
 
-            await sendConfirmationEmail(formData.email, appointmentId, selectedTimeSlot);
+  // Handle filtering based on search query
+  const filteredAppointments = appointments.filter((appointment) =>
+    appointment.doctorName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-            setSuccess('Appointment successfully added!');
-            setFormData({
-                doctorName: '',
-                patientName: '',
-                email: '',
-                phoneNumber: '',
-                nic: ''
-            });
-            setSelectedTimeSlot('');
-            setSelectedDate('');
-            setSelectedSpecialization('');
-            setDoctors([]);
-            setAvailableTimeSlots([]);
-        } catch (error) {
-            setError('Error adding appointment');
-            console.error("Error adding appointment: ", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  // Function to navigate to PatientAppInfo
+  const handleDoctorClick = (doctorName) => {
+    navigate('/patientappinfo', { state: { doctorName } }); // Navigate to PatientAppInfo and pass doctor name
+  };
 
-    const sendConfirmationEmail = async (email, appointmentId, timeSlot) => {
-        console.log(`Sending email to ${email} with appointment ID ${appointmentId} and time slot ${timeSlot}`);
-    };
-
-    return (
-        <div className="appointment-container">
-            <header className="header">
-                <h3>Add Appointment <span className="add-icon">+</span></h3>
-            </header>
-            <div className="form-container">
-                <form onSubmit={handleSubmit}>
-                    {loading && <p>Loading...</p>}
-                    {error && <p className="error-message">{error}</p>}
-                    {success && <p className="success-message">{success}</p>}
-                    <label>
-                        Specialization:
-                        <select onChange={handleSpecializationChange} value={selectedSpecialization}>
-                            <option value="">Select Specialization</option>
-                            {specializations.map(spec => (
-                                <option key={spec} value={spec}>{spec}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label>
-                        Doctor Name:
-                        <select name="doctorName" onChange={handleDoctorChange} value={formData.doctorName}>
-                            <option value="">Select Doctor</option>
-                            {doctors.map(doctor => (
-                                <option key={doctor.id} value={doctor.name}>{doctor.name}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label>
-                        Appointment Date:
-                        <input type="date" value={selectedDate} onChange={handleDateChange} />
-                    </label>
-                    <div className="time-slot-container">
-                        <label>Available Time Slots:</label>
-                        <ul>
-                            {availableTimeSlots.length > 0 ? (
-                                availableTimeSlots.map((slot, index) => (
-                                    <li key={index}>
-                                        <button 
-                                            className={`time-slot-button ${selectedTimeSlot === slot ? 'selected' : ''}`}
-                                            onClick={() => handleTimeSlotClick(slot)}
-                                        >
-                                            {slot}
-                                        </button>
-                                    </li>
-                                ))
-                            ) : (
-                                <p>No available time slots for the selected date.</p>
-                            )}
-                        </ul>
-                    </div>
-
-                    <label>
-                        Patient Name:
-                        <input type="text" name="patientName" value={formData.patientName} onChange={handleInputChange} />
-                    </label>
-                    <label>
-                        Email:
-                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} />
-                    </label>
-                    <label>
-                        Phone Number:
-                        <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
-                    </label>
-                    <label>
-                        NIC:
-                        <input type="text" name="nic" value={formData.nic} onChange={handleInputChange} />
-                    </label>
-                    <button type="submit" disabled={loading}>Confirm</button>
-                </form>
-            </div>
+  return (
+    <div className="appointments-container">
+      <div className="appointments-header">
+        <button
+          className="add-appointment-btn"
+          onClick={() => navigate('/addappointment')} // Navigate to Add Appointment page
+        >
+          Add Appointment +
+        </button>
+        <div className="breadcrumb">
+          <span>Dashboard</span> &gt; <span className="current-page">Patient Appointments</span>
         </div>
-    );
-}
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Search Doctor here"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+      </div>
+
+      <div className="appointments-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Appointment Number</th>
+              <th>Doctor Name</th>
+              <th>Patient Name</th>
+              <th>Appointment Date</th>
+              <th>Visiting Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAppointments.length === 0 ? (
+              <tr>
+                <td colSpan="5">No appointments found</td>
+              </tr>
+            ) : (
+              filteredAppointments.map((appointment) => (
+                <tr key={appointment.id}>
+                  <td>{appointment.appointmentNumber}</td>
+                  <td>
+                    <span
+                      className="doctor-name-link" // Class for styling
+                      onClick={() => handleDoctorClick(appointment.doctorName)} // Add click event to navigate
+                      style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} // Inline styles for a link effect
+                    >
+                      {appointment.doctorName}
+                    </span>
+                  </td>
+                  <td>{appointment.patientName}</td>
+                  <td>{appointment.appointmentDate}</td>
+                  <td>{appointment.visitingTime}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="back-button-container">
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
+          Back
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default PatientAppointment;

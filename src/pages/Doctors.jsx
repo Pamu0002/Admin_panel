@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { db } from '../firebase-config';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import '../pages/Doctor.css';
+import '../pages/Doctors.css';
 
 const Doctors = () => {
   const navigate = useNavigate();
