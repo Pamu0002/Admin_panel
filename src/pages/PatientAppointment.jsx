@@ -58,7 +58,7 @@ const PatientAppointment = () => {
   };
 
   // Function to handle making a new appointment
-  const handleAddAppointment = async (doctorName, patientName, appointmentDate, visitingTime) => {
+  const handleAddAppointment = async (doctorName, patientName, appointmentDate, visitingTime, specialization) => {
     const nextAppointmentNumber = getNextAppointmentNumber(); // Generate next appointment number
 
     try {
@@ -68,6 +68,7 @@ const PatientAppointment = () => {
         patientName,
         appointmentDate,
         visitingTime,
+        specialization, // Include the specialization field
       });
 
       // Add the new appointment to the state
@@ -80,6 +81,7 @@ const PatientAppointment = () => {
           patientName,
           appointmentDate,
           visitingTime,
+          specialization, // Include specialization in the new appointment
         },
       ]);
     } catch (error) {
@@ -123,6 +125,7 @@ const PatientAppointment = () => {
           <thead>
             <tr>
               <th>Appointment Number</th>
+              <th>Specialization</th> {/* New column for specialization */}
               <th>Doctor Name</th>
               <th>Patient Name</th>
               <th>Appointment Date</th>
@@ -132,12 +135,13 @@ const PatientAppointment = () => {
           <tbody>
             {filteredAppointments.length === 0 ? (
               <tr>
-                <td colSpan="5">No appointments found</td>
+                <td colSpan="6">No appointments found</td> {/* Adjusted colspan */}
               </tr>
             ) : (
               filteredAppointments.map((appointment) => (
                 <tr key={appointment.id}>
                   <td>{appointment.appointmentNumber}</td>
+                  <td>{appointment.specialization}</td> {/* Display specialization */}
                   <td>
                     <span
                       className="doctor-name-link" // Class for styling

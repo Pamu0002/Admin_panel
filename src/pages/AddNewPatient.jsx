@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for back navigation
 import { db } from '../firebase-config'; // Import your Firebase config
-import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import './AddNewPatient.css';
 
 const AddNewPatient = () => {
@@ -21,21 +21,19 @@ const AddNewPatient = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate(); // Use navigate for back button
 
-  // Function to generate the reference number
+  // Function to generate the reference number based on existing patients
   const generateReferenceNo = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'Patients'));
-      const totalPatients = querySnapshot.size + 1;
-      const referenceNo = `REF-2024-${totalPatients}`;
-      setPatientData((prevData) => ({ ...prevData, referenceNo }));
+      const q = query(collection(db, 'Patients'), orderBy('referenceNo', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+      const totalPatients = querySnapshot.empty ? 0 : parseInt(querySnapshot.docs[0].data().referenceNo.split('-')[2]);
+      const referenceNo = `REF-2024-${totalPatients + 1}`;
+      return referenceNo;
     } catch (error) {
       console.error('Error generating reference number:', error);
+      return '';
     }
   };
-
-  useEffect(() => {
-    generateReferenceNo();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,8 +43,10 @@ const AddNewPatient = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await setDoc(doc(db, 'Patients', patientData.referenceNo), patientData);
+      const refNo = await generateReferenceNo(); // Get the new reference number before adding
+      await setDoc(doc(db, 'Patients', refNo), { ...patientData, referenceNo: refNo });
       setMessage('Patient registered successfully!');
+      // Clear the form fields
       setPatientData({
         referenceNo: '',
         name: '',
@@ -59,7 +59,6 @@ const AddNewPatient = () => {
         dob: '',
         allergies: ''
       });
-      generateReferenceNo();
     } catch (error) {
       console.error('Error registering patient:', error);
       setMessage('Failed to register patient. Please try again.');

@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase-config'; // Ensure Firebase config is correct
-import { FaTrash } from 'react-icons/fa'; // Remove FaEye import
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
-import './DoctorSchedule.css'; // Import your CSS file
+import { db } from '../firebase-config';
+import { FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import './DoctorSchedule.css';
 
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
 
   // Fetch schedules from Firestore and enrich with specialization
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const scheduleCollection = collection(db, 'schedule'); // Correct collection name
+        const scheduleCollection = collection(db, 'schedule');
         const scheduleSnapshot = await getDocs(scheduleCollection);
 
         const scheduleList = await Promise.all(
@@ -28,9 +28,9 @@ const DoctorSchedule = () => {
             const specialization = doctorDoc.exists() ? doctorDoc.data().specialization : 'N/A';
 
             return {
-              doctorId, // Use doctorId as the primary key
-              ...scheduleData, // Spread the fields from Firestore
-              specialization, // Add specialization field
+              doctorId, 
+              ...scheduleData,
+              specialization, 
             };
           })
         );
@@ -51,8 +51,8 @@ const DoctorSchedule = () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this schedule?');
     if (confirmDelete) {
       try {
-        await deleteDoc(doc(db, 'schedule', doctorId)); // Delete document from Firestore
-        setSchedules(schedules.filter((schedule) => schedule.doctorId !== doctorId)); // Update state
+        await deleteDoc(doc(db, 'schedule', doctorId));
+        setSchedules(schedules.filter((schedule) => schedule.doctorId !== doctorId));
       } catch (error) {
         console.error('Error deleting schedule:', error);
       }
@@ -63,7 +63,7 @@ const DoctorSchedule = () => {
   const toggleStatus = async (doctorId, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
     try {
-      await updateDoc(doc(db, 'schedule', doctorId), { status: newStatus }); // Update status in Firestore
+      await updateDoc(doc(db, 'schedule', doctorId), { status: newStatus });
       setSchedules((prevSchedules) =>
         prevSchedules.map((schedule) =>
           schedule.doctorId === doctorId ? { ...schedule, status: newStatus } : schedule
@@ -76,7 +76,7 @@ const DoctorSchedule = () => {
 
   // Navigate to AddSchedule component
   const handleAddSchedule = () => {
-    navigate('/add-schedule'); // Navigate to the AddSchedule page
+    navigate('/add-schedule');
   };
 
   // Filter schedules based on search term
@@ -109,9 +109,9 @@ const DoctorSchedule = () => {
           <thead>
             <tr>
               <th>Doctor ID</th> {/* Doctor ID column */}
-              <th>Appointment Date</th> {/* Appointment Date column */}
-              <th>Doctor Name</th> {/* Doctor Name column */}
-              <th>Specialization</th> {/* New Specialization column */}
+              <th>Specialization</th> {/* Move specialization next to Doctor ID */}
+              <th>Appointment Date</th>
+              <th>Doctor Name</th>
               <th>Visiting Time</th>
               <th>Status</th>
               <th>Action</th>
@@ -121,10 +121,10 @@ const DoctorSchedule = () => {
             {filteredSchedules.map((schedule) => (
               <tr key={schedule.doctorId}>
                 <td>{schedule.doctorId}</td> {/* Display Doctor ID */}
-                <td>{schedule.appointmentDate}</td> {/* Display appointment date */}
-                <td>{schedule.doctorName}</td> {/* Display doctor name */}
                 <td>{schedule.specialization}</td> {/* Display specialization */}
-                <td>{schedule.visitingTime}</td> {/* Display visiting time */}
+                <td>{schedule.appointmentDate}</td> 
+                <td>{schedule.doctorName}</td> 
+                <td>{schedule.visitingTime}</td> 
                 <td>
                   <button
                     className={`status-btn ${

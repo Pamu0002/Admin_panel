@@ -5,8 +5,9 @@ import {
   getDocs, 
   query, 
   where, 
-  addDoc 
-} from 'firebase/firestore';
+  doc, 
+  setDoc 
+} from 'firebase/firestore'; // Import setDoc and doc
 import './AddSchedule.css';
 
 const AddSchedule = () => {
@@ -114,8 +115,9 @@ const AddSchedule = () => {
         const visitingTime = `${startTime} - ${endTime}`;
 
         try {
-            // Use addDoc to create a new unique document for each appointment
-            await addDoc(collection(db, 'schedule'), {
+            // Use setDoc to ensure the document ID is the doctorId
+            const scheduleRef = doc(db, 'schedule', selectedDoctor.doctorId);
+            await setDoc(scheduleRef, {
                 doctorId: selectedDoctor.doctorId,
                 specialization: selectedSpecialization,
                 doctorName: selectedDoctorName,

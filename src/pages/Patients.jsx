@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../firebase-config';
-import { collection, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { FaSave, FaEdit, FaTrash } from 'react-icons/fa';
 import '../pages/Patients.css';
 
@@ -48,19 +48,19 @@ const Patients = () => {
 
   const handleEditPatient = (id, patientData) => {
     setEditingPatientId(id);
-    setEditableData(patientData); // Populate editable data with the current patient's info
+    setEditableData(patientData);
   };
 
   const handleSavePatient = async (id) => {
     try {
       const patientDoc = doc(db, 'Patients', id);
-      await updateDoc(patientDoc, editableData); // Update the patient in Firestore
+      await updateDoc(patientDoc, editableData);
       setPatients(
         patients.map(patient =>
           patient.referenceNo === id ? { ...patient, ...editableData } : patient
         )
       );
-      setEditingPatientId(null); // Exit edit mode
+      setEditingPatientId(null);
     } catch (error) {
       console.error('Error saving patient:', error);
     }
@@ -75,8 +75,43 @@ const Patients = () => {
   };
 
   const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.name && patient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const addOrUpdatePatient = async (patientData) => {
+    const existingPatient = patients.find(patient => patient.email === patientData.email);
+    
+    if (existingPatient) {
+      // Update existing patient
+      const patientDoc = doc(db, 'Patients', existingPatient.referenceNo);
+      await updateDoc(patientDoc, patientData);
+      setPatients(patients.map(patient => 
+        patient.referenceNo === existingPatient.referenceNo ? { ...patient, ...patientData } : patient
+      ));
+    } else {
+      // Add new patient
+      try {
+        const newPatientRef = await addDoc(collection(db, 'Patients'), patientData);
+        setPatients([...patients, { referenceNo: newPatientRef.id, ...patientData }]);
+      } catch (error) {
+        console.error('Error adding new patient:', error);
+      }
+    }
+  };
+
+  // Function to add patient from Appointments collection
+  const addPatientFromAppointment = async (appointmentData) => {
+    const patientData = {
+      name: appointmentData.name,
+      email: appointmentData.email,
+      phone: appointmentData.phone,
+      address: appointmentData.address,
+      nic: appointmentData.nic,
+    };
+
+    // Use the same method as before to add a new patient
+    await addOrUpdatePatient(patientData);
+  };
 
   return (
     <div className="patient-container">
@@ -120,7 +155,7 @@ const Patients = () => {
                     <input
                       type="text"
                       name="name"
-                      value={editableData.name}
+                      value={editableData.name || ''}
                       onChange={handleInputChange}
                     />
                   ) : (
@@ -132,7 +167,7 @@ const Patients = () => {
                     <input
                       type="text"
                       name="email"
-                      value={editableData.email}
+                      value={editableData.email || ''}
                       onChange={handleInputChange}
                     />
                   ) : (
@@ -144,7 +179,7 @@ const Patients = () => {
                     <input
                       type="text"
                       name="phone"
-                      value={editableData.phone}
+                      value={editableData.phone || ''}
                       onChange={handleInputChange}
                     />
                   ) : (
@@ -156,7 +191,7 @@ const Patients = () => {
                     <input
                       type="text"
                       name="address"
-                      value={editableData.address}
+                      value={editableData.address || ''}
                       onChange={handleInputChange}
                     />
                   ) : (
@@ -168,7 +203,7 @@ const Patients = () => {
                     <input
                       type="text"
                       name="nic"
-                      value={editableData.nic}
+                      value={editableData.nic || ''}
                       onChange={handleInputChange}
                     />
                   ) : (

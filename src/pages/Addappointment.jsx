@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase-config';
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  setDoc,
+  arrayUnion,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 import './Addappointment.css';
 
 const Addappointment = () => {
@@ -26,6 +36,7 @@ const Addappointment = () => {
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [loadingDates, setLoadingDates] = useState(false);
   const [loadingTimes, setLoadingTimes] = useState(false);
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
     const fetchSpecializations = async () => {
@@ -47,7 +58,24 @@ const Addappointment = () => {
       }
     };
 
+    const fetchPatients = async () => {
+      try {
+        const q = query(collection(db, 'Patients'));
+        const querySnapshot = await getDocs(q);
+
+        const patientsList = querySnapshot.docs.map((doc) => ({
+          referenceNo: parseInt(doc.id, 10),
+          ...doc.data(),
+        }));
+
+        setPatients(patientsList);
+      } catch (error) {
+        console.error('Error fetching patients: ', error);
+      }
+    };
+
     fetchSpecializations();
+    fetchPatients();
   }, []);
 
   const handleChange = (e) => {
@@ -55,19 +83,24 @@ const Addappointment = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'specialization') {
-      setFormData((prev) => ({ ...prev, doctorName: '', appointmentDate: '', visitingTime: '' }));
+      setFormData((prev) => ({
+        ...prev,
+        doctorName: '',
+        appointmentDate: '',
+        visitingTime: '',
+      }));
       fetchDoctors(value);
-      setAppointmentDates([]); // Clear appointment dates when specialization changes
-      setTimeSlots([]); // Clear time slots when specialization changes
+      setAppointmentDates([]);
+      setTimeSlots([]);
     }
 
     if (name === 'doctorName') {
       setFormData((prev) => ({ ...prev, appointmentDate: '', visitingTime: '' }));
-      fetchAppointmentDates(value); // Fetch appointment dates when a doctor is selected
+      fetchAppointmentDates(value);
     }
 
     if (name === 'appointmentDate') {
-      fetchVisitingTimes(formData.doctorName, value); // Fetch visiting times when an appointment date is selected
+      fetchVisitingTimes(formData.doctorName, value);
     }
   };
 
@@ -116,12 +149,7 @@ const Addappointment = () => {
           datesSet.add(doc.data().appointmentDate);
         });
 
-        // Check if datesSet is empty and set to an empty array
-        if (datesSet.size === 0) {
-          setAppointmentDates([]); // No dates available for the selected doctor
-        } else {
-          setAppointmentDates([...datesSet]); // Convert Set to Array
-        }
+        setAppointmentDates([...datesSet]);
       }
     } catch (error) {
       console.error('Error fetching appointment dates: ', error);
@@ -140,7 +168,11 @@ const Addappointment = () => {
     try {
       const doctorDoc = doctors.find((doctor) => doctor.doctorName === doctorName);
       if (doctorDoc) {
-        const q = query(collection(db, 'schedule'), where('doctorId', '==', doctorDoc.id), where('appointmentDate', '==', appointmentDate));
+        const q = query(
+          collection(db, 'schedule'),
+          where('doctorId', '==', doctorDoc.id),
+          where('appointmentDate', '==', appointmentDate)
+        );
         const querySnapshot = await getDocs(q);
 
         const timeSlotsList = [];
@@ -157,15 +189,43 @@ const Addappointment = () => {
     }
   };
 
-  const generateAppointmentNumber = () => {
-    return 'APPT-' + new Date().getTime();
+  const generateNextReferenceNo = () => {
+    if (patients.length === 0) return 1;
+    const referenceNos = patients.map((patient) => patient.referenceNo);
+    return Math.max(...referenceNos) + 1;
+  };
+
+  const generateNextAppointmentNumber = async () => {
+    const q = query(collection(db, 'Appointments'), orderBy('appointmentNumber', 'desc'), limit(1));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log("No previous appointments found. Starting at APPT-001.");
+      return 'APPT-001';
+    }
+
+    const lastAppointmentNumber = querySnapshot.docs[0].data().appointmentNumber;
+    console.log("Last appointment number found:", lastAppointmentNumber);
+
+    const lastNumber = parseInt(lastAppointmentNumber.split('-')[1], 10);
+    const nextNumber = lastNumber + 1;
+
+    const newAppointmentNumber = `APPT-${String(nextNumber).padStart(3, '0')}`;
+    console.log("New appointment number generated:", newAppointmentNumber);
+    
+    return newAppointmentNumber;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const appointmentNumber = generateAppointmentNumber();
+      const appointmentNumber = await generateNextAppointmentNumber();
+      const referenceNo = generateNextReferenceNo();
+
+      console.log("Generated appointment number:", appointmentNumber);
+      console.log("Generated reference number:", referenceNo);
+
       const appointmentData = {
         appointmentNumber,
         specialization: formData.specialization,
@@ -178,13 +238,24 @@ const Addappointment = () => {
         gender: formData.gender,
         bloodGroup: formData.bloodGroup,
         address: formData.address,
+        referenceNo,
       };
 
       if (formData.email) {
         appointmentData.email = formData.email;
       }
 
-      await setDoc(doc(db, 'Appointments', appointmentNumber), appointmentData);
+      // Save the appointment as a new document
+      await setDoc(doc(db, 'Appointments', appointmentData.appointmentNumber), appointmentData);
+
+      const patientRef = doc(db, 'Patients', referenceNo.toString());
+      const patientUpdateData = {
+        referenceNo,
+        lastAppointment: appointmentData,
+        appointments: arrayUnion(appointmentData.appointmentNumber),
+      };
+      await setDoc(patientRef, patientUpdateData, { merge: true });
+
       alert('Appointment successfully added!');
 
       setFormData({
@@ -203,6 +274,7 @@ const Addappointment = () => {
       setDoctors([]);
       setAppointmentDates([]);
       setTimeSlots([]);
+      setPatients([]);
     } catch (error) {
       console.error('Error adding appointment: ', error);
       alert('Failed to add appointment. Please try again.');
@@ -236,16 +308,15 @@ const Addappointment = () => {
         </div>
 
         <div>
-          <label htmlFor="doctorName">Doctor Name:</label>
+          <label htmlFor="doctorName">Doctor:</label>
           <select
             name="doctorName"
             id="doctorName"
             value={formData.doctorName}
             onChange={handleChange}
             required
-            disabled={doctors.length === 0}
           >
-            <option value="">Select a doctor...</option>
+            <option value="">Select...</option>
             {loadingDoctors ? (
               <option>Loading doctors...</option>
             ) : (
@@ -259,52 +330,47 @@ const Addappointment = () => {
         </div>
 
         <div>
-          <label>Appointment Date:</label>
-          <div className="appointment-dates">
+          <label htmlFor="appointmentDate">Appointment Date:</label>
+          <select
+            name="appointmentDate"
+            id="appointmentDate"
+            value={formData.appointmentDate}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select...</option>
             {loadingDates ? (
-              <p>Loading appointment dates...</p>
+              <option>Loading dates...</option>
             ) : (
-              appointmentDates.length > 0 ? (
-                appointmentDates.map((date, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className={formData.appointmentDate === date ? 'selected' : ''}
-                    onClick={() => {
-                      setFormData((prev) => ({ ...prev, appointmentDate: date }));
-                      fetchVisitingTimes(formData.doctorName, date); // Fetch visiting times for the selected date
-                    }}
-                  >
-                    {date}
-                  </button>
-                ))
-              ) : (
-                <p>No available appointment dates</p>
-              )
+              appointmentDates.map((date, index) => (
+                <option key={index} value={date}>
+                  {date}
+                </option>
+              ))
             )}
-          </div>
+          </select>
         </div>
 
         <div>
-          <label>Visiting Time:</label>
-          <div className="time-slots">
-            {timeSlots.length > 0 ? (
-              timeSlots.map((slot, index) => (
-                <label key={index}>
-                  <input
-                    type="radio"
-                    name="visitingTime"
-                    value={slot}
-                    onChange={handleChange}
-                    required
-                  />
-                  {slot}
-                </label>
-              ))
+          <label htmlFor="visitingTime">Visiting Time:</label>
+          <select
+            name="visitingTime"
+            id="visitingTime"
+            value={formData.visitingTime}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select...</option>
+            {loadingTimes ? (
+              <option>Loading times...</option>
             ) : (
-              <p>No available visiting times</p>
+              timeSlots.map((time, index) => (
+                <option key={index} value={time}>
+                  {time}
+                </option>
+              ))
             )}
-          </div>
+          </select>
         </div>
 
         <div>
@@ -384,10 +450,10 @@ const Addappointment = () => {
             <option value="A-">A-</option>
             <option value="B+">B+</option>
             <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
             <option value="O+">O+</option>
             <option value="O-">O-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
           </select>
         </div>
 
