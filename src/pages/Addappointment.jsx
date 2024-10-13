@@ -20,10 +20,8 @@ const Addappointment = () => {
 
   const [specializations, setSpecializations] = useState([]);
   const [doctors, setDoctors] = useState([]);
-  const [appointments, setAppointments] = useState([]);
   const [loadingSpecializations, setLoadingSpecializations] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
-  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   useEffect(() => {
     const fetchSpecializations = async () => {
@@ -56,10 +54,6 @@ const Addappointment = () => {
       setFormData((prev) => ({ ...prev, doctorName: '', visitingTime: '', appointmentDate: '' }));
       fetchDoctors(value);
     }
-
-    if (name === 'doctorName') {
-      fetchAppointments(value);
-    }
   };
 
   const fetchDoctors = async (specialization) => {
@@ -89,48 +83,8 @@ const Addappointment = () => {
     }
   };
 
-  const fetchAppointments = async (doctorName) => {
-    if (!doctorName) {
-      setAppointments([]);
-      return;
-    }
-
-    setLoadingAppointments(true);
-    try {
-      const q = query(collection(db, 'Appointments'), where('doctorName', '==', doctorName));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const appointmentsList = querySnapshot.docs.map((doc) => doc.data());
-        setAppointments(appointmentsList);
-
-        if (appointmentsList.length > 0) {
-          const firstAppointment = appointmentsList[0];
-          setFormData((prev) => ({
-            ...prev,
-            appointmentDate: firstAppointment.appointmentDate || '',
-            visitingTime: firstAppointment.visitingTime || '',
-            nic: firstAppointment.nic || '',
-            patientName: firstAppointment.patientName || '',
-            phone: firstAppointment.phone || '',
-            email: firstAppointment.email || '',
-            gender: firstAppointment.gender || '',
-            bloodGroup: firstAppointment.bloodGroup || '',
-            address: firstAppointment.address || '',
-          }));
-        }
-      } else {
-        setAppointments([]);
-      }
-    } catch (error) {
-      console.error('Error fetching appointments: ', error);
-    } finally {
-      setLoadingAppointments(false);
-    }
-  };
-
   const generateAppointmentNumber = () => {
-    return 'APPT-' + new Date().getTime(); 
+    return 'APPT-' + new Date().getTime();
   };
 
   const handleSubmit = async (e) => {
@@ -173,7 +127,6 @@ const Addappointment = () => {
         address: '',
       });
       setDoctors([]);
-      setAppointments([]);
     } catch (error) {
       console.error('Error adding appointment: ', error);
       alert('Failed to add appointment. Please try again.');
@@ -229,117 +182,112 @@ const Addappointment = () => {
           </select>
         </div>
 
-        {/* Display all appointment fields if fetched */}
-        {appointments.length > 0 && (
-          <>
-            <div>
-              <label htmlFor="appointmentDate">Appointment Date:</label>
-              <input
-                type="date"
-                name="appointmentDate"
-                id="appointmentDate"
-                value={formData.appointmentDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="appointmentDate">Appointment Date:</label>
+          <input
+            type="date"
+            name="appointmentDate"
+            id="appointmentDate"
+            value={formData.appointmentDate}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="visitingTime">Visiting Time:</label>
-              <input
-                type="text"
-                name="visitingTime"
-                id="visitingTime"
-                value={formData.visitingTime}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="visitingTime">Visiting Time:</label>
+          <input
+            type="text"
+            name="visitingTime"
+            id="visitingTime"
+            value={formData.visitingTime}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="nic">NIC:</label>
-              <input
-                type="text"
-                name="nic"
-                id="nic"
-                value={formData.nic}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="nic">NIC:</label>
+          <input
+            type="text"
+            name="nic"
+            id="nic"
+            value={formData.nic}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="patientName">Patient Name:</label>
-              <input
-                type="text"
-                name="patientName"
-                id="patientName"
-                value={formData.patientName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="patientName">Patient Name:</label>
+          <input
+            type="text"
+            name="patientName"
+            id="patientName"
+            value={formData.patientName}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="phone">Phone:</label>
-              <input
-                type="text"
-                name="phone"
-                id="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="phone">Phone:</label>
+          <input
+            type="text"
+            name="phone"
+            id="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="email">Email:</label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+        <div>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
 
-            <div>
-              <label htmlFor="gender">Gender:</label>
-              <input
-                type="text"
-                name="gender"
-                id="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="gender">Gender:</label>
+          <input
+            type="text"
+            name="gender"
+            id="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="bloodGroup">Blood Group:</label>
-              <input
-                type="text"
-                name="bloodGroup"
-                id="bloodGroup"
-                value={formData.bloodGroup}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div>
+          <label htmlFor="bloodGroup">Blood Group:</label>
+          <input
+            type="text"
+            name="bloodGroup"
+            id="bloodGroup"
+            value={formData.bloodGroup}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <div>
-              <label htmlFor="address">Address:</label>
-              <input
-                type="text"
-                name="address"
-                id="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </>
-        )}
+        <div>
+          <label htmlFor="address">Address:</label>
+          <input
+            type="text"
+            name="address"
+            id="address"
+            value={formData.address}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
         <button type="submit">Add Appointment</button>
       </form>
