@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase-config'; // Ensure Firebase config is correct
-import { FaTrash } from 'react-icons/fa'; // Import only FaTrash since FaEye is no longer needed
+import { FaTrash } from 'react-icons/fa'; // Remove FaEye import
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
 import './DoctorSchedule.css'; // Import your CSS file
 
@@ -11,40 +11,39 @@ const DoctorSchedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate(); // Initialize useNavigate hook
 
-  // Fetch schedules and doctor status from Firestore
+  // Fetch schedules from Firestore and enrich with specialization
   useEffect(() => {
-    const fetchSchedulesWithStatus = async () => {
-      setLoading(true); // Start loading
+    const fetchSchedules = async () => {
       try {
-        const scheduleCollection = collection(db, 'schedule'); // Fetch from schedule collection
+        const scheduleCollection = collection(db, 'schedule'); // Correct collection name
         const scheduleSnapshot = await getDocs(scheduleCollection);
+
         const scheduleList = await Promise.all(
           scheduleSnapshot.docs.map(async (scheduleDoc) => {
-            const doctorId = scheduleDoc.id; // Get doctor ID
-            const scheduleData = scheduleDoc.data(); // Get schedule data
+            const doctorId = scheduleDoc.id;
+            const scheduleData = scheduleDoc.data();
 
-            // Fetch the doctor’s status from the Doctors collection using the doctorId
-            const doctorRef = doc(db, 'Doctors', doctorId);
-            const doctorSnap = await getDoc(doctorRef);
-            const doctorStatus = doctorSnap.exists() ? doctorSnap.data().status : 'Unknown'; // Get doctor status or default to 'Unknown'
+            // Fetch the corresponding doctor specialization
+            const doctorDoc = await getDoc(doc(db, 'Doctors', doctorId));
+            const specialization = doctorDoc.exists() ? doctorDoc.data().specialization : 'N/A';
 
-            // Return schedule data combined with doctor status
             return {
-              doctorId,
-              ...scheduleData,
-              status: doctorStatus, // Include the doctor's status
+              doctorId, // Use doctorId as the primary key
+              ...scheduleData, // Spread the fields from Firestore
+              specialization, // Add specialization field
             };
           })
         );
-        setSchedules(scheduleList); // Update state with schedules and status
-        setLoading(false); // Stop loading
+
+        setSchedules(scheduleList);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching schedules with status:', error);
+        console.error('Error fetching schedules:', error);
         setLoading(false);
       }
     };
 
-    fetchSchedulesWithStatus();
+    fetchSchedules();
   }, []);
 
   // Handle deleting a schedule
@@ -57,6 +56,21 @@ const DoctorSchedule = () => {
       } catch (error) {
         console.error('Error deleting schedule:', error);
       }
+    }
+  };
+
+  // Toggle schedule status between 'Active' and 'Inactive'
+  const toggleStatus = async (doctorId, currentStatus) => {
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    try {
+      await updateDoc(doc(db, 'schedule', doctorId), { status: newStatus }); // Update status in Firestore
+      setSchedules((prevSchedules) =>
+        prevSchedules.map((schedule) =>
+          schedule.doctorId === doctorId ? { ...schedule, status: newStatus } : schedule
+        )
+      );
+    } catch (error) {
+      console.error('Error updating status:', error);
     }
   };
 
@@ -97,9 +111,10 @@ const DoctorSchedule = () => {
               <th>Doctor ID</th> {/* Doctor ID column */}
               <th>Appointment Date</th> {/* Appointment Date column */}
               <th>Doctor Name</th> {/* Doctor Name column */}
-              <th>Visiting Time</th> {/* Visiting Time column */}
-              <th>Status</th> {/* Doctor Status column */}
-              <th>Action</th> {/* Action column */}
+              <th>Specialization</th> {/* New Specialization column */}
+              <th>Visiting Time</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -108,9 +123,17 @@ const DoctorSchedule = () => {
                 <td>{schedule.doctorId}</td> {/* Display Doctor ID */}
                 <td>{schedule.appointmentDate}</td> {/* Display appointment date */}
                 <td>{schedule.doctorName}</td> {/* Display doctor name */}
+                <td>{schedule.specialization}</td> {/* Display specialization */}
                 <td>{schedule.visitingTime}</td> {/* Display visiting time */}
-                <td className={schedule.status === 'Active' ? 'status-active' : 'status-inactive'}>
-                  {schedule.status} {/* Display doctor status */}
+                <td>
+                  <button
+                    className={`status-btn ${
+                      schedule.status === 'Active' ? 'available' : 'unavailable'
+                    }`}
+                    onClick={() => toggleStatus(schedule.doctorId, schedule.status)}
+                  >
+                    {schedule.status === 'Active' ? 'Available' : 'Unavailable'}
+                  </button>
                 </td>
                 <td>
                   <button

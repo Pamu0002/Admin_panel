@@ -20,8 +20,12 @@ const Addappointment = () => {
 
   const [specializations, setSpecializations] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [appointmentDates, setAppointmentDates] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([]);
   const [loadingSpecializations, setLoadingSpecializations] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [loadingDates, setLoadingDates] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
 
   useEffect(() => {
     const fetchSpecializations = async () => {
@@ -51,8 +55,19 @@ const Addappointment = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'specialization') {
-      setFormData((prev) => ({ ...prev, doctorName: '', visitingTime: '', appointmentDate: '' }));
+      setFormData((prev) => ({ ...prev, doctorName: '', appointmentDate: '', visitingTime: '' }));
       fetchDoctors(value);
+      setAppointmentDates([]); // Clear appointment dates when specialization changes
+      setTimeSlots([]); // Clear time slots when specialization changes
+    }
+
+    if (name === 'doctorName') {
+      setFormData((prev) => ({ ...prev, appointmentDate: '', visitingTime: '' }));
+      fetchAppointmentDates(value); // Fetch appointment dates when a doctor is selected
+    }
+
+    if (name === 'appointmentDate') {
+      fetchVisitingTimes(formData.doctorName, value); // Fetch visiting times when an appointment date is selected
     }
   };
 
@@ -80,6 +95,65 @@ const Addappointment = () => {
       console.error('Error fetching doctors: ', error);
     } finally {
       setLoadingDoctors(false);
+    }
+  };
+
+  const fetchAppointmentDates = async (doctorName) => {
+    if (!doctorName) {
+      setAppointmentDates([]);
+      return;
+    }
+
+    setLoadingDates(true);
+    try {
+      const doctorDoc = doctors.find((doctor) => doctor.doctorName === doctorName);
+      if (doctorDoc) {
+        const q = query(collection(db, 'schedule'), where('doctorId', '==', doctorDoc.id));
+        const querySnapshot = await getDocs(q);
+
+        const datesSet = new Set();
+        querySnapshot.forEach((doc) => {
+          datesSet.add(doc.data().appointmentDate);
+        });
+
+        // Check if datesSet is empty and set to an empty array
+        if (datesSet.size === 0) {
+          setAppointmentDates([]); // No dates available for the selected doctor
+        } else {
+          setAppointmentDates([...datesSet]); // Convert Set to Array
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching appointment dates: ', error);
+    } finally {
+      setLoadingDates(false);
+    }
+  };
+
+  const fetchVisitingTimes = async (doctorName, appointmentDate) => {
+    if (!doctorName || !appointmentDate) {
+      setTimeSlots([]);
+      return;
+    }
+
+    setLoadingTimes(true);
+    try {
+      const doctorDoc = doctors.find((doctor) => doctor.doctorName === doctorName);
+      if (doctorDoc) {
+        const q = query(collection(db, 'schedule'), where('doctorId', '==', doctorDoc.id), where('appointmentDate', '==', appointmentDate));
+        const querySnapshot = await getDocs(q);
+
+        const timeSlotsList = [];
+        querySnapshot.forEach((doc) => {
+          timeSlotsList.push(doc.data().visitingTime);
+        });
+
+        setTimeSlots(timeSlotsList);
+      }
+    } catch (error) {
+      console.error('Error fetching visiting times: ', error);
+    } finally {
+      setLoadingTimes(false);
     }
   };
 
@@ -127,6 +201,8 @@ const Addappointment = () => {
         address: '',
       });
       setDoctors([]);
+      setAppointmentDates([]);
+      setTimeSlots([]);
     } catch (error) {
       console.error('Error adding appointment: ', error);
       alert('Failed to add appointment. Please try again.');
@@ -183,27 +259,52 @@ const Addappointment = () => {
         </div>
 
         <div>
-          <label htmlFor="appointmentDate">Appointment Date:</label>
-          <input
-            type="date"
-            name="appointmentDate"
-            id="appointmentDate"
-            value={formData.appointmentDate}
-            onChange={handleChange}
-            required
-          />
+          <label>Appointment Date:</label>
+          <div className="appointment-dates">
+            {loadingDates ? (
+              <p>Loading appointment dates...</p>
+            ) : (
+              appointmentDates.length > 0 ? (
+                appointmentDates.map((date, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    className={formData.appointmentDate === date ? 'selected' : ''}
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, appointmentDate: date }));
+                      fetchVisitingTimes(formData.doctorName, date); // Fetch visiting times for the selected date
+                    }}
+                  >
+                    {date}
+                  </button>
+                ))
+              ) : (
+                <p>No available appointment dates</p>
+              )
+            )}
+          </div>
         </div>
 
         <div>
-          <label htmlFor="visitingTime">Visiting Time:</label>
-          <input
-            type="text"
-            name="visitingTime"
-            id="visitingTime"
-            value={formData.visitingTime}
-            onChange={handleChange}
-            required
-          />
+          <label>Visiting Time:</label>
+          <div className="time-slots">
+            {timeSlots.length > 0 ? (
+              timeSlots.map((slot, index) => (
+                <label key={index}>
+                  <input
+                    type="radio"
+                    name="visitingTime"
+                    value={slot}
+                    onChange={handleChange}
+                    required
+                  />
+                  {slot}
+                </label>
+              ))
+            ) : (
+              <p>No available visiting times</p>
+            )}
+          </div>
         </div>
 
         <div>
@@ -233,7 +334,7 @@ const Addappointment = () => {
         <div>
           <label htmlFor="phone">Phone:</label>
           <input
-            type="text"
+            type="tel"
             name="phone"
             id="phone"
             value={formData.phone}
@@ -255,32 +356,44 @@ const Addappointment = () => {
 
         <div>
           <label htmlFor="gender">Gender:</label>
-          <input
-            type="text"
+          <select
             name="gender"
             id="gender"
             value={formData.gender}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Select...</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
         <div>
           <label htmlFor="bloodGroup">Blood Group:</label>
-          <input
-            type="text"
+          <select
             name="bloodGroup"
             id="bloodGroup"
             value={formData.bloodGroup}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Select...</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
         </div>
 
         <div>
           <label htmlFor="address">Address:</label>
-          <input
-            type="text"
+          <textarea
             name="address"
             id="address"
             value={formData.address}

@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../firebase-config'; // Ensure this path is correct
-import { collection, getDocs, query, where, setDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase-config'; 
+import { 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
+  addDoc 
+} from 'firebase/firestore';
 import './AddSchedule.css';
 
 const AddSchedule = () => {
@@ -65,7 +71,7 @@ const AddSchedule = () => {
 
                 const doctors = snapshot.docs.map((doc) => ({
                     doctorName: doc.data().doctorName,
-                    doctorId: doc.id // Store the document ID as doctorId
+                    doctorId: doc.id 
                 }));
                 setDoctorNames(doctors);
             } catch (err) {
@@ -81,11 +87,10 @@ const AddSchedule = () => {
 
     const handleTimeClick = (time) => {
         if (!startTime) {
-            setStartTime(time); // Set start time
+            setStartTime(time);
         } else if (!endTime && time > startTime) {
-            setEndTime(time); // Set end time if it's after the start time
+            setEndTime(time);
         } else {
-            // Reset if user clicks a new time range
             setStartTime(time);
             setEndTime('');
         }
@@ -97,37 +102,31 @@ const AddSchedule = () => {
             return;
         }
 
-        // Find the selected doctorId from the doctorNames list
-        const selectedDoctor = doctorNames.find(doctor => doctor.doctorName === selectedDoctorName);
+        const selectedDoctor = doctorNames.find(
+            (doctor) => doctor.doctorName === selectedDoctorName
+        );
 
         if (!selectedDoctor) {
             alert('Doctor not found!');
             return;
         }
 
-        // Create visitingTime string combining startTime and endTime
         const visitingTime = `${startTime} - ${endTime}`;
 
         try {
-            // Log the data to ensure it's correct before saving
-            console.log("Saving the following data:", {
+            // Use addDoc to create a new unique document for each appointment
+            await addDoc(collection(db, 'schedule'), {
+                doctorId: selectedDoctor.doctorId,
                 specialization: selectedSpecialization,
                 doctorName: selectedDoctorName,
                 appointmentDate,
-                visitingTime, // Save visiting time in this format
-            });
-
-            // Use setDoc to store the appointment in the "schedule" collection with doctorId as the document ID
-            await setDoc(doc(db, 'schedule', selectedDoctor.doctorId), {
-                specialization: selectedSpecialization,
-                doctorName: selectedDoctorName,
-                appointmentDate,
-                visitingTime, // Store the visiting time
+                visitingTime,
+                status: 'Active' // Default status
             });
 
             alert(`Appointment scheduled with Dr. ${selectedDoctorName} on ${appointmentDate} from ${visitingTime}`);
 
-            // Clear the form fields after successful scheduling
+            // Clear form fields
             setSelectedSpecialization('');
             setSelectedDoctorName('');
             setAppointmentDate('');
