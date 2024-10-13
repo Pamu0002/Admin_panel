@@ -1,147 +1,208 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebase-config'; // Ensure this path is correct
+import { collection, getDocs, query, where, setDoc, doc } from 'firebase/firestore';
 import './AddSchedule.css';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const AddSchedule = () => {
-    const [doctorId, setDoctorId] = useState('');
-    const [doctorName, setDoctorName] = useState('');
-    const [specialization, setSpecialization] = useState('');
+    const [specializations, setSpecializations] = useState([]);
+    const [selectedSpecialization, setSelectedSpecialization] = useState('');
+    const [doctorNames, setDoctorNames] = useState([]);
+    const [selectedDoctorName, setSelectedDoctorName] = useState('');
     const [appointmentDate, setAppointmentDate] = useState('');
-    const [selectedTimes, setSelectedTimes] = useState([]);
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    // Example time slots
     const timeSlots = [
         "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
         "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
         "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
-        "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
+        "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM",
+        "05:00 PM"
     ];
 
-    // Fetch doctor details based on Doctor ID
-    const fetchDoctorDetails = async (id) => {
-        const db = getFirestore();
-        try {
-            const docRef = doc(db, 'Doctors', id); // Firestore path to Doctor document
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setDoctorName(data.name || ''); // Set doctor name
-                setSpecialization(data.specialization || ''); // Set specialization
-            } else {
-                setDoctorName(''); // Clear name if not found
-                setSpecialization(''); // Clear specialization if not found
-                alert('Doctor not found.'); // Alert user if doctor is not found
-            }
-        } catch (error) {
-            console.error('Error fetching doctor details: ', error);
-            alert('Failed to fetch doctor details.'); // Alert user on error
-        }
-    };
+    // Fetch all specializations
+    useEffect(() => {
+        const fetchSpecializations = async () => {
+            setLoading(true);
+            try {
+                const snapshot = await getDocs(collection(db, 'Doctors'));
+                const specializationSet = new Set();
 
-    const handleDoctorIdChange = (e) => {
-        const id = e.target.value;
-        setDoctorId(id); // Update state with Doctor ID
-        if (id) {
-            fetchDoctorDetails(id); // Fetch doctor details if ID is provided
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    specializationSet.add(data.specialization);
+                });
+
+                setSpecializations([...specializationSet]);
+            } catch (err) {
+                console.error('Error fetching specializations:', err);
+                setError('Failed to load specializations.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSpecializations();
+    }, []);
+
+    // Fetch doctor names based on selected specialization
+    useEffect(() => {
+        const fetchDoctorNames = async () => {
+            if (!selectedSpecialization) {
+                setDoctorNames([]);
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const q = query(
+                    collection(db, 'Doctors'),
+                    where('specialization', '==', selectedSpecialization)
+                );
+                const snapshot = await getDocs(q);
+
+                const doctors = snapshot.docs.map((doc) => ({
+                    doctorName: doc.data().doctorName,
+                    doctorId: doc.id // Store the document ID as doctorId
+                }));
+                setDoctorNames(doctors);
+            } catch (err) {
+                console.error('Error fetching doctor names:', err);
+                setError('Failed to load doctor names.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDoctorNames();
+    }, [selectedSpecialization]);
+
+    const handleTimeClick = (time) => {
+        if (!startTime) {
+            setStartTime(time); // Set start time
+        } else if (!endTime && time > startTime) {
+            setEndTime(time); // Set end time if it's after the start time
         } else {
-            setDoctorName(''); // Clear doctor name and specialization if ID is empty
-            setSpecialization('');
+            // Reset if user clicks a new time range
+            setStartTime(time);
+            setEndTime('');
         }
     };
 
-    const handleTimeSelect = (time) => {
-        setSelectedTimes(prev => {
-            if (prev.includes(time)) {
-                return prev.filter(t => t !== time); // Remove time if already selected
-            } else if (prev.length < 2) {
-                return [...prev, time]; // Add time if less than 2 are selected
-            }
-            return prev; // Otherwise, keep the list as is
-        });
-    };
-
-    const handleSchedule = async () => {
-        if (selectedTimes.length !== 2) {
-            alert('Please select exactly two time slots.');
+    const handleConfirm = async () => {
+        if (!selectedSpecialization || !selectedDoctorName || !appointmentDate || !startTime || !endTime) {
+            alert('Please fill all fields!');
             return;
         }
 
-        const visitingTime = selectedTimes.join(' - '); // Format as "Start Time - End Time"
-        
+        // Find the selected doctorId from the doctorNames list
+        const selectedDoctor = doctorNames.find(doctor => doctor.doctorName === selectedDoctorName);
+
+        if (!selectedDoctor) {
+            alert('Doctor not found!');
+            return;
+        }
+
+        // Create visitingTime string combining startTime and endTime
+        const visitingTime = `${startTime} - ${endTime}`;
+
         try {
-            const db = getFirestore();
-            await setDoc(doc(db, 'schedule', doctorId), {
-                doctorId,
-                doctorName,
-                specialization,
+            // Log the data to ensure it's correct before saving
+            console.log("Saving the following data:", {
+                specialization: selectedSpecialization,
+                doctorName: selectedDoctorName,
                 appointmentDate,
-                visitingTime
+                visitingTime, // Save visiting time in this format
             });
-            alert('Appointment scheduled successfully!'); // Alert on success
-        } catch (error) {
-            console.error('Error scheduling appointment: ', error);
-            alert('Failed to schedule appointment.'); // Alert on error
+
+            // Use setDoc to store the appointment in the "schedule" collection with doctorId as the document ID
+            await setDoc(doc(db, 'schedule', selectedDoctor.doctorId), {
+                specialization: selectedSpecialization,
+                doctorName: selectedDoctorName,
+                appointmentDate,
+                visitingTime, // Store the visiting time
+            });
+
+            alert(`Appointment scheduled with Dr. ${selectedDoctorName} on ${appointmentDate} from ${visitingTime}`);
+
+            // Clear the form fields after successful scheduling
+            setSelectedSpecialization('');
+            setSelectedDoctorName('');
+            setAppointmentDate('');
+            setStartTime('');
+            setEndTime('');
+        } catch (err) {
+            console.error('Error scheduling appointment:', err);
+            alert('Failed to schedule appointment. Please try again.');
         }
     };
 
+    const isTimeSelected = (time) => {
+        return time === startTime || (time > startTime && time <= endTime);
+    };
+
     return (
-        <div className="add-schedule-container">
+        <div className="schedule-appointment-container">
             <h2>Schedule an Appointment</h2>
-            <div className="add-schedule-form">
-                <div className="form-field">
-                    <label htmlFor="doctorId">Doctor ID:</label>
-                    <input
-                        id="doctorId"
-                        type="text"
-                        value={doctorId}
-                        onChange={handleDoctorIdChange}
-                    />
-                </div>
-                <div className="form-field">
-                    <label htmlFor="doctorName">Doctor Name:</label>
-                    <input
-                        id="doctorName"
-                        type="text"
-                        value={doctorName}
-                        readOnly
-                    />
-                </div>
-                <div className="form-field">
+            {error && <p className="error-message">{error}</p>}
+            <div className="appointment-form">
+                <div className="form-row">
                     <label htmlFor="specialization">Specialization:</label>
-                    <input
+                    <select
                         id="specialization"
-                        type="text"
-                        value={specialization}
-                        readOnly
-                    />
+                        value={selectedSpecialization}
+                        onChange={(e) => setSelectedSpecialization(e.target.value)}
+                    >
+                        <option value="">--Select Specialization--</option>
+                        {specializations.map((spec, index) => (
+                            <option key={index} value={spec}>{spec}</option>
+                        ))}
+                    </select>
                 </div>
-                <div className="date-time-section">
-                    <div className="form-field">
-                        <label htmlFor="appointmentDate">Select Date:</label>
-                        <input
-                            id="appointmentDate"
-                            type="date"
-                            value={appointmentDate}
-                            onChange={(e) => setAppointmentDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-field">
-                        <label htmlFor="appointmentTime">Select Time:</label>
-                        <div className="time-slots">
-                            {timeSlots.map((time, index) => (
-                                <button
-                                    key={index}
-                                    className={`time-slot ${selectedTimes.includes(time) ? 'selected' : ''}`}
-                                    onClick={() => handleTimeSelect(time)}
-                                >
-                                    {time}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+
+                <div className="form-row">
+                    <label htmlFor="doctorName">Doctor Name:</label>
+                    <select
+                        id="doctorName"
+                        value={selectedDoctorName}
+                        onChange={(e) => setSelectedDoctorName(e.target.value)}
+                    >
+                        <option value="">--Select Doctor--</option>
+                        {doctorNames.map((doctor, index) => (
+                            <option key={index} value={doctor.doctorName}>{doctor.doctorName}</option>
+                        ))}
+                    </select>
                 </div>
-                <button onClick={handleSchedule}>Confirm</button>
             </div>
+
+            <div className="calendar-section">
+                <h3>Select Date:</h3>
+                <input
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
+                />
+            </div>
+
+            <div className="time-section">
+                <h3>Select Time Range:</h3>
+                <div className="time-slots">
+                    {timeSlots.map((time, index) => (
+                        <button
+                            key={index}
+                            className={`time-slot ${isTimeSelected(time) ? 'selected' : ''}`}
+                            onClick={() => handleTimeClick(time)}
+                        >
+                            {time}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <button className="confirm-button" onClick={handleConfirm}>Confirm</button>
+            {loading && <p>Loading...</p>}
         </div>
     );
 };

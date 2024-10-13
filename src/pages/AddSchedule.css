@@ -1,92 +1,106 @@
-.add-schedule-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+.schedule-appointment-container {
+    max-width: 600px;
+    margin: 0 auto;
     padding: 20px;
-    background-color: #f4f4f4;
-    overflow-y: auto; /* Allows scrolling if content overflows */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 
-.add-schedule-container h2 {
+h2 {
     text-align: center;
+}
+
+.appointment-form {
     margin-bottom: 20px;
 }
 
-.add-schedule-form {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px; /* Reduced gap between form fields */
+.form-row {
+    margin-bottom: 15px;
 }
 
-.form-field {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-field label {
+label {
+    display: block;
     margin-bottom: 5px;
-    font-weight: bold;
 }
 
-.form-field input {
-    padding: 4px; /* Reduced padding */
+select, input {
+    width: 100%;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 12px; /* Reduced font size */
-    width: 100%; /* Full width of the container */
-    box-sizing: border-box; /* Include padding and border in the element's total width */
 }
 
-.date-time-section {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Adjusted column sizes */
-    gap: 15px; /* Reduced gap between date and time section */
-    grid-column: 1 / -1; /* Span across all columns */
-    align-items: start; /* Align items to the start */
+.doctor-name-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
 }
 
-.date-time-section .form-field {
-    margin-bottom: 0; /* Remove bottom margin */
+.doctor-name-item {
+    padding: 10px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    margin: 5px 0;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
 }
 
-.date-time-section input[type="date"] {
-    width: 100%; /* Ensure input takes full width of its container */
-    font-size: 12px; /* Reduced font size */
+.doctor-name-item:hover {
+    background-color: #e0e0e0;
+}
+
+.doctor-name-item.selected {
+    background-color: #007bff;
+    color: rgb(0, 0, 0);
+}
+
+.calendar-section {
+    margin: 20px 0;
+}
+
+.time-section {
+    margin: 20px 0;
 }
 
 .time-slots {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns for smaller time slots */
-    gap: 6px; /* Reduced gap between time slots */
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .time-slot {
-    padding: 4px; /* Reduced padding */
-    background: #ffffff;
+    margin: 5px;
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    text-align: center;
-    color: black;
-    font-size: 10px; /* Reduced font size */
-    box-sizing: border-box; /* Include padding and border in the element's total width */
-    height: 24px; /* Further reduced height */
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+.time-slot:hover {
+    background-color: #e0e0e0;
 }
 
 .time-slot.selected {
-    background-color: #4CAF50;
+    background-color: #007bff;
     color: white;
-    border-color: #4CAF50;
 }
 
-button {
-    grid-column: span 2;  /* Span across all columns for alignment */
-    padding: 6px; /* Reduced padding */
-    background-color: #4CAF50;
+.confirm-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 12px; /* Reduced font size */
-    height: 30px; /* Set a fixed height */
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.confirm-button:hover {
+    background-color: #0056b3;
 }

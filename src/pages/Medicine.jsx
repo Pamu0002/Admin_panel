@@ -1,7 +1,7 @@
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'; // Import necessary Firestore functions
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Use useNavigate for navigation
 import { db } from '../firebase-config'; // Import your Firebase configuration
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import necessary Firestore functions
 import './Medicine.css';
 
 function Medicine() {

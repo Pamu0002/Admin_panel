@@ -13,7 +13,7 @@ const TopBar = () => {
         } else if (hours >= 12 && hours < 18) {
             setGreeting('Good Afternoon!');
         } else {
-            setGreeting('Good Night!');
+            setGreeting('Good Evening!');
         }
     }, []);
 

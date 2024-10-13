@@ -15,15 +15,15 @@ const Doctors = () => {
       try {
         const doctorsCollection = collection(db, 'Doctors');
         const snapshot = await getDocs(doctorsCollection);
-        
+
         const doctorsData = snapshot.docs.map(doc => ({
-          id: doc.id,
+          id: doc.id, // Firestore document ID
           doctorId: doc.data().id || '', // Accessing the manual Doctor Id
-          name: doc.data().doctorName || '', // Changed from fullName to doctorName
+          name: doc.data().doctorName || '',
           email: doc.data().email || '',
           phone: doc.data().phoneNumber || '',
           specialization: doc.data().specialization || '',
-          status: doc.data().status || 'Inactive'
+          status: doc.data().status || 'Unavailable' // Default to 'Unavailable'
         }));
 
         setDoctors(doctorsData); // Set the original list of doctors
@@ -40,29 +40,29 @@ const Doctors = () => {
     navigate('/new-doctor');
   };
 
-  const toggleStatus = async (id, currentStatus) => {
+  const toggleStatus = async (doctorId, currentStatus) => {
     try {
-      const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-      const doctorRef = doc(db, 'Doctors', id);
+      const newStatus = currentStatus === 'Available' ? 'Unavailable' : 'Available'; // Toggle between Available and Unavailable
+      const doctorRef = doc(db, 'Doctors', doctorId);
       await updateDoc(doctorRef, { status: newStatus });
       setDoctors(doctors.map(doctor =>
-        doctor.id === id ? { ...doctor, status: newStatus } : doctor
+        doctor.doctorId === doctorId ? { ...doctor, status: newStatus } : doctor
       ));
       setFilteredDoctors(filteredDoctors.map(doctor =>
-        doctor.id === id ? { ...doctor, status: newStatus } : doctor
+        doctor.doctorId === doctorId ? { ...doctor, status: newStatus } : doctor
       ));
     } catch (error) {
       console.error("Error updating doctor status: ", error);
     }
   };
 
-  const handleDeleteDoctor = async (id) => {
+  const handleDeleteDoctor = async (doctorId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this doctor?");
     if (confirmDelete) {
       try {
-        await deleteDoc(doc(db, 'Doctors', id));
-        setDoctors(doctors.filter(doctor => doctor.id !== id));
-        setFilteredDoctors(filteredDoctors.filter(doctor => doctor.id !== id));
+        await deleteDoc(doc(db, 'Doctors', doctorId));
+        setDoctors(doctors.filter(doctor => doctor.doctorId !== doctorId));
+        setFilteredDoctors(filteredDoctors.filter(doctor => doctor.doctorId !== doctorId));
       } catch (error) {
         console.error("Error deleting doctor: ", error);
       }
@@ -125,26 +125,23 @@ const Doctors = () => {
                 <td>{doctor.specialization}</td>
                 <td>
                   <div className="status-container">
-                    <span className={`status-label ${doctor.status === 'Active' ? 'active' : 'inactive'}`}>
-                      {doctor.status === 'Active' ? 'Active' : 'Inactive'}
+                    <span className={`status-label ${doctor.status === 'Available' ? 'available' : 'unavailable'}`}>
+                      {doctor.status === 'Available' ? 'Available' : 'Unavailable'}
                     </span>
                     <label className="switch">
                       <input
                         type="checkbox"
-                        checked={doctor.status === 'Active'}
-                        onChange={() => toggleStatus(doctor.id, doctor.status)}
+                        checked={doctor.status === 'Available'}
+                        onChange={() => toggleStatus(doctor.doctorId, doctor.status)}
                       />
                       <span className="slider round"></span>
                     </label>
-                    <span className={`status-label ${doctor.status === 'Active' ? 'inactive' : 'active'}`}>
-                      {doctor.status === 'Active' ? 'Deactivate' : 'Activate'}
-                    </span>
                   </div>
                 </td>
                 <td>
                   <button
                     className="delete-button"
-                    onClick={() => handleDeleteDoctor(doctor.id)}
+                    onClick={() => handleDeleteDoctor(doctor.doctorId)}
                   >
                     Delete
                   </button>

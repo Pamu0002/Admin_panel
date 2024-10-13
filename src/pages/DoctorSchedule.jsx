@@ -1,48 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase-config'; // Ensure your Firebase config is correctly set up
-import { FaEye, FaTrash } from 'react-icons/fa';
+import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase-config'; // Ensure Firebase config is correct
+import { FaTrash } from 'react-icons/fa'; // Import only FaTrash since FaEye is no longer needed
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
-import './DoctorSchedule.css'; // Link the correct CSS file for styling
+import './DoctorSchedule.css'; // Import your CSS file
 
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
-  // Fetch schedules from Firebase
+  // Fetch schedules and doctor status from Firestore
   useEffect(() => {
-    const fetchSchedules = async () => {
+    const fetchSchedulesWithStatus = async () => {
+      setLoading(true); // Start loading
       try {
-        const scheduleCollection = collection(db, 'DoctorSchedules'); // Collection name in Firestore
+        const scheduleCollection = collection(db, 'schedule'); // Fetch from schedule collection
         const scheduleSnapshot = await getDocs(scheduleCollection);
-        const scheduleList = scheduleSnapshot.docs.map((doc) => ({
-          id: doc.id, // Firebase document ID
-          ...doc.data(),
-        }));
-        setSchedules(scheduleList);
-        setLoading(false);
+        const scheduleList = await Promise.all(
+          scheduleSnapshot.docs.map(async (scheduleDoc) => {
+            const doctorId = scheduleDoc.id; // Get doctor ID
+            const scheduleData = scheduleDoc.data(); // Get schedule data
+
+            // Fetch the doctor’s status from the Doctors collection using the doctorId
+            const doctorRef = doc(db, 'Doctors', doctorId);
+            const doctorSnap = await getDoc(doctorRef);
+            const doctorStatus = doctorSnap.exists() ? doctorSnap.data().status : 'Unknown'; // Get doctor status or default to 'Unknown'
+
+            // Return schedule data combined with doctor status
+            return {
+              doctorId,
+              ...scheduleData,
+              status: doctorStatus, // Include the doctor's status
+            };
+          })
+        );
+        setSchedules(scheduleList); // Update state with schedules and status
+        setLoading(false); // Stop loading
       } catch (error) {
-        console.error('Error fetching schedules:', error);
+        console.error('Error fetching schedules with status:', error);
         setLoading(false);
       }
     };
 
-    fetchSchedules();
+    fetchSchedulesWithStatus();
   }, []);
 
-  // Delete a schedule entry
-  const handleDeleteSchedule = async (id) => {
+  // Handle deleting a schedule
+  const handleDeleteSchedule = async (doctorId) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this schedule?');
     if (confirmDelete) {
       try {
-        await deleteDoc(doc(db, 'DoctorSchedules', id)); // Delete from Firebase
-        setSchedules(schedules.filter((schedule) => schedule.id !== id)); // Update local state
+        await deleteDoc(doc(db, 'schedule', doctorId)); // Delete document from Firestore
+        setSchedules(schedules.filter((schedule) => schedule.doctorId !== doctorId)); // Update state
       } catch (error) {
         console.error('Error deleting schedule:', error);
       }
     }
+  };
+
+  // Navigate to AddSchedule component
+  const handleAddSchedule = () => {
+    navigate('/add-schedule'); // Navigate to the AddSchedule page
   };
 
   // Filter schedules based on search term
@@ -50,13 +70,8 @@ const DoctorSchedule = () => {
     schedule.doctorName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Navigate to the AddSchedule component when the button is clicked
-  const handleAddSchedule = () => {
-    navigate('/add-schedule'); // Navigate to AddSchedule route
-  };
-
   return (
-    <div className="doctor-schedule compact">
+    <div className="doctor-schedule">
       <div className="header">
         <button className="schedule-button" onClick={handleAddSchedule}>
           + Add Schedule
@@ -68,9 +83,6 @@ const DoctorSchedule = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="search-icon">
-            <i className="fas fa-search"></i>
-          </button>
         </div>
       </div>
 
@@ -82,27 +94,29 @@ const DoctorSchedule = () => {
         <table className="schedule-table">
           <thead>
             <tr>
-              <th>Schedule Date</th>
-              <th>Doctor Name</th>
-              <th>Visiting Time</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>Doctor ID</th> {/* Doctor ID column */}
+              <th>Appointment Date</th> {/* Appointment Date column */}
+              <th>Doctor Name</th> {/* Doctor Name column */}
+              <th>Visiting Time</th> {/* Visiting Time column */}
+              <th>Status</th> {/* Doctor Status column */}
+              <th>Action</th> {/* Action column */}
             </tr>
           </thead>
           <tbody>
             {filteredSchedules.map((schedule) => (
-              <tr key={schedule.id}>
-                <td>{schedule.date}</td> {/* Schedule Date displayed here */}
-                <td>{schedule.doctorName}</td>
-                <td>{schedule.visitingTime}</td>
+              <tr key={schedule.doctorId}>
+                <td>{schedule.doctorId}</td> {/* Display Doctor ID */}
+                <td>{schedule.appointmentDate}</td> {/* Display appointment date */}
+                <td>{schedule.doctorName}</td> {/* Display doctor name */}
+                <td>{schedule.visitingTime}</td> {/* Display visiting time */}
                 <td className={schedule.status === 'Active' ? 'status-active' : 'status-inactive'}>
-                  {schedule.status}
+                  {schedule.status} {/* Display doctor status */}
                 </td>
                 <td>
-                  <button className="action-btn view-btn">
-                    <FaEye />
-                  </button>
-                  <button className="action-btn delete-btn" onClick={() => handleDeleteSchedule(schedule.id)}>
+                  <button
+                    className="action-btn delete-btn"
+                    onClick={() => handleDeleteSchedule(schedule.doctorId)}
+                  >
                     <FaTrash />
                   </button>
                 </td>
@@ -112,7 +126,9 @@ const DoctorSchedule = () => {
         </table>
       )}
 
-      <button className="back-button">Back</button>
+      <button className="back-button" onClick={() => navigate(-1)}>
+        Back
+      </button>
     </div>
   );
 };
