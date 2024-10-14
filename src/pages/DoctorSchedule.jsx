@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, getDoc, updateDoc, setDoc, arrayRemove } from 'firebase/firestore'; // Import necessary Firestore methods
 import { db } from '../firebase-config';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ const DoctorSchedule = () => {
 
         const scheduleList = await Promise.all(
           scheduleSnapshot.docs.map(async (scheduleDoc) => {
-            const doctorId = scheduleDoc.id;
+            const doctorId = scheduleDoc.id; // Get the document ID as doctorId
             const scheduleData = scheduleDoc.data();
 
             // Fetch the corresponding doctor specialization
@@ -46,13 +46,39 @@ const DoctorSchedule = () => {
     fetchSchedules();
   }, []);
 
+  // Function to delete a specific field from the schedule document
+  const handleDeleteField = async (doctorId, fieldName) => {
+    try {
+      await updateDoc(doc(db, 'schedule', doctorId), {
+        [fieldName]: null // Set the field to null to delete it
+      });
+      console.log(`Field ${fieldName} deleted from schedule for doctorId: ${doctorId}`);
+
+      // Optionally, you can update the state to reflect the deletion in the UI
+      setSchedules((prevSchedules) =>
+        prevSchedules.map((schedule) =>
+          schedule.doctorId === doctorId ? { ...schedule, [fieldName]: undefined } : schedule
+        )
+      );
+    } catch (error) {
+      console.error('Error deleting field:', error);
+    }
+  };
+
   // Handle deleting a schedule
   const handleDeleteSchedule = async (doctorId) => {
+    console.log('Deleting schedule for doctorId:', doctorId); // Log doctorId for debugging
+
     const confirmDelete = window.confirm('Are you sure you want to delete this schedule?');
     if (confirmDelete) {
       try {
+        // Delete the document from Firestore
         await deleteDoc(doc(db, 'schedule', doctorId));
+
+        // Update state to remove the deleted schedule from the UI
         setSchedules(schedules.filter((schedule) => schedule.doctorId !== doctorId));
+
+        console.log('Schedule deleted successfully');
       } catch (error) {
         console.error('Error deleting schedule:', error);
       }
@@ -69,6 +95,7 @@ const DoctorSchedule = () => {
           schedule.doctorId === doctorId ? { ...schedule, status: newStatus } : schedule
         )
       );
+      console.log(`Status updated to ${newStatus} for doctorId:`, doctorId);
     } catch (error) {
       console.error('Error updating status:', error);
     }
@@ -141,6 +168,13 @@ const DoctorSchedule = () => {
                     onClick={() => handleDeleteSchedule(schedule.doctorId)}
                   >
                     <FaTrash />
+                  </button>
+                  {/* Add delete field button, change 'fieldName' to the actual field you want to delete */}
+                  <button
+                    className="action-btn delete-field-btn"
+                    onClick={() => handleDeleteField(schedule.doctorId, 'visitingTime')} // Example: deleting the 'visitingTime' field
+                  >
+                    Delete Visiting Time
                   </button>
                 </td>
               </tr>
