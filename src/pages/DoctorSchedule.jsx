@@ -17,6 +17,8 @@ const DoctorSchedule = () => {
       try {
         const scheduleCollection = collection(db, 'schedule'); // Collection name
         const scheduleSnapshot = await getDocs(scheduleCollection);
+        
+        console.log("Fetched doctors:", scheduleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // Log fetched doctor documents
 
         const scheduleList = await Promise.all(
           scheduleSnapshot.docs.map(async (scheduleDoc) => {
@@ -32,12 +34,14 @@ const DoctorSchedule = () => {
               ...scheduleSubDoc.data(),
             }));
 
+            console.log(`Fetched schedules for doctor ${doctorId}:`, doctorSchedules); // Log fetched schedules for each doctor
             return doctorSchedules;
           })
         );
 
         // Flatten the array and update state
         setSchedules(scheduleList.flat());
+        console.log("All schedules:", scheduleList.flat()); // Log all schedules
         setLoading(false);
       } catch (error) {
         console.error('Error fetching schedules:', error);
@@ -105,24 +109,30 @@ const DoctorSchedule = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredSchedules.map((schedule) => (
-              <tr key={schedule.scheduleId}>
-                <td>{schedule.doctorId}</td>
-                <td>{schedule.scheduleId}</td>
-                <td>{schedule.appointmentDate}</td>
-                <td>{schedule.doctorName}</td>
-                <td>{schedule.specialization}</td>
-                <td>{schedule.visitingTime}</td>
-                <td>
-                  <button
-                    className="action-btn delete-btn"
-                    onClick={() => handleDeleteSchedule(schedule.doctorId, schedule.scheduleId)}
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
+            {schedules.length > 0 ? (
+              schedules.map((schedule) => (
+                <tr key={schedule.scheduleId}>
+                  <td>{schedule.doctorId}</td>
+                  <td>{schedule.scheduleId}</td>
+                  <td>{schedule.appointmentDate}</td>
+                  <td>{schedule.doctorName}</td>
+                  <td>{schedule.specialization}</td>
+                  <td>{schedule.visitingTime}</td>
+                  <td>
+                    <button
+                      className="action-btn delete-btn"
+                      onClick={() => handleDeleteSchedule(schedule.doctorId, schedule.scheduleId)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7">No schedules found.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       )}
