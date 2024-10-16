@@ -5,8 +5,8 @@ import {
   getDocs, 
   query, 
   where, 
-  doc, 
-  setDoc 
+  setDoc, 
+  doc 
 } from 'firebase/firestore'; // Import setDoc and doc
 import './AddSchedule.css';
 
@@ -72,7 +72,7 @@ const AddSchedule = () => {
 
                 const doctors = snapshot.docs.map((doc) => ({
                     doctorName: doc.data().doctorName,
-                    doctorId: doc.id 
+                    doctorId: doc.id // Use the doc ID as doctorId
                 }));
                 setDoctorNames(doctors);
             } catch (err) {
@@ -97,6 +97,14 @@ const AddSchedule = () => {
         }
     };
 
+    const generateScheduleId = async (doctorId) => {
+        const schedulesRef = collection(db, 'schedule', doctorId, 'schedules');
+        const snapshot = await getDocs(schedulesRef);
+        const count = snapshot.size;
+        const newId = `D${doctorId.slice(-2)}-${String(count + 1).padStart(2, '0')}`; // Format as D01-01, D01-02, etc.
+        return newId;
+    };
+
     const handleConfirm = async () => {
         if (!selectedSpecialization || !selectedDoctorName || !appointmentDate || !startTime || !endTime) {
             alert('Please fill all fields!');
@@ -115,9 +123,16 @@ const AddSchedule = () => {
         const visitingTime = `${startTime} - ${endTime}`;
 
         try {
-            // Use setDoc to ensure the document ID is the doctorId
-            const scheduleRef = doc(db, 'schedule', selectedDoctor.doctorId);
-            await setDoc(scheduleRef, {
+            // Get the unique schedule ID for this doctor
+            const scheduleId = await generateScheduleId(selectedDoctor.doctorId);
+
+            // Create or update the doctor's document with doctorId in the schedule collection
+            const doctorScheduleDocRef = doc(db, 'schedule', selectedDoctor.doctorId);
+
+            // Add the schedule as a subcollection
+            const scheduleSubCollectionRef = collection(doctorScheduleDocRef, 'schedules');
+            await setDoc(doc(scheduleSubCollectionRef, scheduleId), {
+                scheduleId, // Unique schedule ID like D01-01
                 doctorId: selectedDoctor.doctorId,
                 specialization: selectedSpecialization,
                 doctorName: selectedDoctorName,
