@@ -1,20 +1,20 @@
+// src/pages/Addappointment.jsx
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase-config';
+import { db } from '../firebase-config'; // Ensure this path is correct 
 import {
   collection,
   query,
   where,
   getDocs,
-  doc,
   setDoc,
-  arrayUnion,
-  orderBy,
-  limit,
+  doc,
 } from 'firebase/firestore';
-import './Addappointment.css';
+import './Addappointment.css'; // Ensure this file exists
 
 const Addappointment = () => {
   const [formData, setFormData] = useState({
+    appointmentNumber: '',
+    scheduleId: '',
     specialization: '',
     doctorName: '',
     nic: '',
@@ -32,233 +32,185 @@ const Addappointment = () => {
   const [doctors, setDoctors] = useState([]);
   const [appointmentDates, setAppointmentDates] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
-  const [loadingSpecializations, setLoadingSpecializations] = useState(false);
-  const [loadingDoctors, setLoadingDoctors] = useState(false);
-  const [loadingDates, setLoadingDates] = useState(false);
-  const [loadingTimes, setLoadingTimes] = useState(false);
-  const [patients, setPatients] = useState([]);
+  const [scheduleId, setScheduleId] = useState('');
 
-  useEffect(() => {
-    const fetchSpecializations = async () => {
-      setLoadingSpecializations(true);
-      try {
-        const q = query(collection(db, 'Doctors'));
-        const querySnapshot = await getDocs(q);
-
-        const specializationsSet = new Set();
-        querySnapshot.forEach((doc) => {
-          specializationsSet.add(doc.data().specialization);
-        });
-
-        setSpecializations([...specializationsSet]);
-      } catch (error) {
-        console.error('Error fetching specializations: ', error);
-      } finally {
-        setLoadingSpecializations(false);
-      }
-    };
-
-    const fetchPatients = async () => {
-      try {
-        const q = query(collection(db, 'Patients'));
-        const querySnapshot = await getDocs(q);
-
-        const patientsList = querySnapshot.docs.map((doc) => ({
-          referenceNo: parseInt(doc.id, 10),
-          ...doc.data(),
-        }));
-
-        setPatients(patientsList);
-      } catch (error) {
-        console.error('Error fetching patients: ', error);
-      }
-    };
-
-    fetchSpecializations();
-    fetchPatients();
-  }, []);
-
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'specialization') {
+      fetchDoctorsBySpecialization(value);
       setFormData((prev) => ({
         ...prev,
         doctorName: '',
         appointmentDate: '',
         visitingTime: '',
+        scheduleId: '',
       }));
-      fetchDoctors(value);
       setAppointmentDates([]);
       setTimeSlots([]);
-    }
-
-    if (name === 'doctorName') {
-      setFormData((prev) => ({ ...prev, appointmentDate: '', visitingTime: '' }));
-      fetchAppointmentDates(value);
-    }
-
-    if (name === 'appointmentDate') {
+      setScheduleId('');
+    } else if (name === 'doctorName') {
+      fetchSchedulesByDoctor(value);
+      setFormData((prev) => ({
+        ...prev,
+        appointmentDate: '',
+        visitingTime: '',
+        scheduleId: '',
+      }));
+      setAppointmentDates([]);
+      setTimeSlots([]);
+      setScheduleId('');
+    } else if (name === 'appointmentDate') {
       fetchVisitingTimes(formData.doctorName, value);
+      setFormData((prev) => ({
+        ...prev,
+        visitingTime: '',
+        scheduleId: '',
+      }));
+      setScheduleId('');
+    } else if (name === 'visitingTime') {
+      // Find and set the scheduleId based on selected visitingTime
+      const selectedTimeSlot = timeSlots.find(slot => slot.time === value);
+      if (selectedTimeSlot) {
+        setScheduleId(selectedTimeSlot.scheduleId);
+        setFormData((prev) => ({
+          ...prev,
+          scheduleId: selectedTimeSlot.scheduleId,
+        }));
+      } else {
+        setScheduleId('');
+        setFormData((prev) => ({
+          ...prev,
+          scheduleId: '',
+        }));
+      }
     }
   };
 
-  const fetchDoctors = async (specialization) => {
-    if (!specialization) {
-      setDoctors([]);
-      return;
-    }
-
-    setLoadingDoctors(true);
+  // Fetch doctors based on specialization
+  const fetchDoctorsBySpecialization = async (specialization) => {
     try {
       const q = query(collection(db, 'Doctors'), where('specialization', '==', specialization));
       const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        setDoctors([]);
-      } else {
-        const doctorsList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          doctorName: doc.data().doctorName,
-        }));
-        setDoctors(doctorsList);
-      }
+      const doctorsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        doctorName: doc.data().doctorName,
+      }));
+      setDoctors(doctorsList);
     } catch (error) {
       console.error('Error fetching doctors: ', error);
-    } finally {
-      setLoadingDoctors(false);
     }
   };
 
-  const fetchAppointmentDates = async (doctorName) => {
-    if (!doctorName) {
-      setAppointmentDates([]);
-      return;
-    }
-
-    setLoadingDates(true);
+  // Fetch schedules based on doctorId
+  const fetchSchedulesByDoctor = async (doctorId) => {
     try {
-      const doctorDoc = doctors.find((doctor) => doctor.doctorName === doctorName);
-      if (doctorDoc) {
-        const q = query(collection(db, 'schedule'), where('doctorId', '==', doctorDoc.id));
-        const querySnapshot = await getDocs(q);
+      const schedulesRef = collection(db, 'schedule', doctorId, 'schedules');
+      const querySnapshot = await getDocs(schedulesRef);
+      const scheduleList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        scheduleId: doc.data().scheduleId,
+        appointmentDate: doc.data().appointmentDate,
+        visitingTime: doc.data().visitingTime,
+      }));
+      
+      const uniqueDates = [...new Set(scheduleList.map((schedule) => schedule.appointmentDate))];
+      setAppointmentDates(uniqueDates);
 
-        const datesSet = new Set();
-        querySnapshot.forEach((doc) => {
-          datesSet.add(doc.data().appointmentDate);
-        });
+      setTimeSlots([]); // Reset timeSlots
 
-        setAppointmentDates([...datesSet]);
+      // If only one schedule exists, set scheduleId automatically
+      if (scheduleList.length === 1) {
+        setScheduleId(scheduleList[0].scheduleId);
+        setFormData((prev) => ({
+          ...prev,
+          scheduleId: scheduleList[0].scheduleId,
+          appointmentDate: scheduleList[0].appointmentDate,
+          visitingTime: scheduleList[0].visitingTime,
+        }));
+        setAppointmentDates([scheduleList[0].appointmentDate]);
+        setTimeSlots([{ id: scheduleList[0].id, time: scheduleList[0].visitingTime, scheduleId: scheduleList[0].scheduleId }]);
       }
     } catch (error) {
-      console.error('Error fetching appointment dates: ', error);
-    } finally {
-      setLoadingDates(false);
+      console.error('Error fetching schedules: ', error);
     }
   };
 
-  const fetchVisitingTimes = async (doctorName, appointmentDate) => {
-    if (!doctorName || !appointmentDate) {
-      setTimeSlots([]);
-      return;
-    }
-
-    setLoadingTimes(true);
+  // Fetch visiting times based on doctorId and selectedDate
+  const fetchVisitingTimes = async (doctorId, selectedDate) => {
     try {
-      const doctorDoc = doctors.find((doctor) => doctor.doctorName === doctorName);
-      if (doctorDoc) {
-        const q = query(
-          collection(db, 'schedule'),
-          where('doctorId', '==', doctorDoc.id),
-          where('appointmentDate', '==', appointmentDate)
-        );
-        const querySnapshot = await getDocs(q);
-
-        const timeSlotsList = [];
-        querySnapshot.forEach((doc) => {
-          timeSlotsList.push(doc.data().visitingTime);
-        });
-
-        setTimeSlots(timeSlotsList);
-      }
+      const schedulesRef = collection(db, 'schedule', doctorId, 'schedules');
+      const q = query(schedulesRef, where('appointmentDate', '==', selectedDate));
+      const querySnapshot = await getDocs(q);
+      const timeSlotsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        time: doc.data().visitingTime,
+        scheduleId: doc.data().scheduleId,
+      }));
+      setTimeSlots(timeSlotsList);
     } catch (error) {
       console.error('Error fetching visiting times: ', error);
-    } finally {
-      setLoadingTimes(false);
     }
   };
 
-  const generateNextReferenceNo = () => {
-    if (patients.length === 0) return 1;
-    const referenceNos = patients.map((patient) => patient.referenceNo);
-    return Math.max(...referenceNos) + 1;
-  };
-
-  const generateNextAppointmentNumber = async () => {
-    const q = query(collection(db, 'Appointments'), orderBy('appointmentNumber', 'desc'), limit(1));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      console.log("No previous appointments found. Starting at APPT-001.");
-      return 'APPT-001';
-    }
-
-    const lastAppointmentNumber = querySnapshot.docs[0].data().appointmentNumber;
-    console.log("Last appointment number found:", lastAppointmentNumber);
-
-    const lastNumber = parseInt(lastAppointmentNumber.split('-')[1], 10);
-    const nextNumber = lastNumber + 1;
-
-    const newAppointmentNumber = `APPT-${String(nextNumber).padStart(3, '0')}`;
-    console.log("New appointment number generated:", newAppointmentNumber);
-    
-    return newAppointmentNumber;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  // Generate appointment number based on doctorId and scheduleId
+  const generateAppointmentNumber = async (doctorId, scheduleId) => {
     try {
-      const appointmentNumber = await generateNextAppointmentNumber();
-      const referenceNo = generateNextReferenceNo();
+      // Query 'Appointments' where 'scheduleId' == scheduleId
+      const appointmentsRef = collection(db, 'Appointments');
+      const q = query(appointmentsRef, where('scheduleId', '==', scheduleId));
+      const querySnapshot = await getDocs(q);
 
-      console.log("Generated appointment number:", appointmentNumber);
-      console.log("Generated reference number:", referenceNo);
+      const existingNumbers = querySnapshot.docs.map((doc) => {
+        const idParts = doc.id.split('-');
+        const numPart = idParts[idParts.length -1];
+        return parseInt(numPart, 10);
+      });
 
-      const appointmentData = {
-        appointmentNumber,
-        specialization: formData.specialization,
-        doctorName: formData.doctorName,
-        nic: formData.nic,
-        patientName: formData.patientName,
-        phone: formData.phone,
-        appointmentDate: formData.appointmentDate,
-        visitingTime: formData.visitingTime,
-        gender: formData.gender,
-        bloodGroup: formData.bloodGroup,
-        address: formData.address,
-        referenceNo,
-      };
-
-      if (formData.email) {
-        appointmentData.email = formData.email;
+      let newNumber = 1;
+      while (existingNumbers.includes(newNumber)) {
+        newNumber++;
       }
 
-      // Save the appointment as a new document
-      await setDoc(doc(db, 'Appointments', appointmentData.appointmentNumber), appointmentData);
+      // Format appointment number as D01-01-001
+      // Assuming doctorId is like 'D01' and scheduleId is like '01'
+      const appointmentNumber = `${doctorId}-${scheduleId}-${String(newNumber).padStart(3, '0')}`;
 
-      const patientRef = doc(db, 'Patients', referenceNo.toString());
-      const patientUpdateData = {
-        referenceNo,
-        lastAppointment: appointmentData,
-        appointments: arrayUnion(appointmentData.appointmentNumber),
-      };
-      await setDoc(patientRef, patientUpdateData, { merge: true });
+      return appointmentNumber;
+    } catch (error) {
+      console.error('Error generating appointment number: ', error);
+      return null;
+    }
+  };
 
-      alert('Appointment successfully added!');
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { doctorName, appointmentDate, scheduleId } = formData;
 
+      if (!scheduleId) {
+        alert('Please select a schedule.');
+        return;
+      }
+
+      // Generate the appointment number based on doctorId and scheduleId
+      const appointmentNumber = await generateAppointmentNumber(doctorName, scheduleId);
+      if (!appointmentNumber) {
+        throw new Error('Failed to generate appointment number.');
+      }
+
+      const appointmentData = { ...formData, appointmentDate: appointmentDate, appointmentNumber: appointmentNumber };
+
+      // Save the appointment in Firestore
+      await setDoc(doc(db, 'Appointments', appointmentNumber), appointmentData);
+
+      alert('Appointment added successfully!');
       setFormData({
+        appointmentNumber: '',
+        scheduleId: '',
         specialization: '',
         doctorName: '',
         nic: '',
@@ -271,204 +223,114 @@ const Addappointment = () => {
         bloodGroup: '',
         address: '',
       });
-      setDoctors([]);
-      setAppointmentDates([]);
-      setTimeSlots([]);
-      setPatients([]);
+      setScheduleId('');
     } catch (error) {
       console.error('Error adding appointment: ', error);
       alert('Failed to add appointment. Please try again.');
     }
   };
 
+  // Fetch specializations on component mount
+  useEffect(() => {
+    const fetchSpecializations = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'Doctors'));
+        const specializationsSet = new Set();
+        querySnapshot.forEach((doc) => specializationsSet.add(doc.data().specialization));
+        setSpecializations([...specializationsSet]);
+      } catch (error) {
+        console.error('Error fetching specializations: ', error);
+      }
+    };
+    fetchSpecializations();
+  }, []);
+
   return (
     <div className="add-appointment">
       <h2>Add Appointment</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="specialization">Specialization:</label>
-          <select
-            name="specialization"
-            id="specialization"
-            value={formData.specialization}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            {loadingSpecializations ? (
-              <option>Loading specializations...</option>
-            ) : (
-              specializations.map((specialization, index) => (
-                <option key={index} value={specialization}>
-                  {specialization}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        {/* Schedule ID */}
+        <label>Schedule ID</label>
+        <input type="text" value={scheduleId} readOnly />
 
-        <div>
-          <label htmlFor="doctorName">Doctor:</label>
-          <select
-            name="doctorName"
-            id="doctorName"
-            value={formData.doctorName}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            {loadingDoctors ? (
-              <option>Loading doctors...</option>
-            ) : (
-              doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.doctorName}>
-                  {doctor.doctorName}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        {/* Appointment Number */}
+        <label>Appointment Number</label>
+        <input type="text" value={formData.appointmentNumber} readOnly />
 
-        <div>
-          <label htmlFor="appointmentDate">Appointment Date:</label>
-          <select
-            name="appointmentDate"
-            id="appointmentDate"
-            value={formData.appointmentDate}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            {loadingDates ? (
-              <option>Loading dates...</option>
-            ) : (
-              appointmentDates.map((date, index) => (
-                <option key={index} value={date}>
-                  {date}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        {/* Specialization */}
+        <label>Specialization</label>
+        <select name="specialization" value={formData.specialization} onChange={handleChange}>
+          <option value="">Select Specialization</option>
+          {specializations.map((spec) => (
+            <option key={spec} value={spec}>
+              {spec}
+            </option>
+          ))}
+        </select>
 
-        <div>
-          <label htmlFor="visitingTime">Visiting Time:</label>
-          <select
-            name="visitingTime"
-            id="visitingTime"
-            value={formData.visitingTime}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            {loadingTimes ? (
-              <option>Loading times...</option>
-            ) : (
-              timeSlots.map((time, index) => (
-                <option key={index} value={time}>
-                  {time}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+        {/* Doctor Name */}
+        <label>Doctor Name</label>
+        <select name="doctorName" value={formData.doctorName} onChange={handleChange}>
+          <option value="">Select Doctor</option>
+          {doctors.map((doc) => (
+            <option key={doc.id} value={doc.id}>
+              {doc.doctorName}
+            </option>
+          ))}
+        </select>
 
-        <div>
-          <label htmlFor="nic">NIC:</label>
-          <input
-            type="text"
-            name="nic"
-            id="nic"
-            value={formData.nic}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {/* Appointment Date */}
+        <label>Appointment Date</label>
+        <select name="appointmentDate" value={formData.appointmentDate} onChange={handleChange}>
+          <option value="">Select Appointment Date</option>
+          {appointmentDates.map((date) => (
+            <option key={date} value={date}>
+              {date}
+            </option>
+          ))}
+        </select>
 
-        <div>
-          <label htmlFor="patientName">Patient Name:</label>
-          <input
-            type="text"
-            name="patientName"
-            id="patientName"
-            value={formData.patientName}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {/* Visiting Time */}
+        <label>Visiting Time</label>
+        <select name="visitingTime" value={formData.visitingTime} onChange={handleChange}>
+          <option value="">Select Visiting Time</option>
+          {timeSlots.map((slot) => (
+            <option key={slot.id} value={slot.time}>
+              {slot.time}
+            </option>
+          ))}
+        </select>
 
-        <div>
-          <label htmlFor="phone">Phone:</label>
-          <input
-            type="tel"
-            name="phone"
-            id="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {/* NIC */}
+        <label>NIC</label>
+        <input type="text" name="nic" value={formData.nic} onChange={handleChange} required />
 
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
+        {/* Patient Name */}
+        <label>Patient Name</label>
+        <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} required />
 
-        <div>
-          <label htmlFor="gender">Gender:</label>
-          <select
-            name="gender"
-            id="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+        {/* Phone */}
+        <label>Phone</label>
+        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
 
-        <div>
-          <label htmlFor="bloodGroup">Blood Group:</label>
-          <select
-            name="bloodGroup"
-            id="bloodGroup"
-            value={formData.bloodGroup}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select...</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-          </select>
-        </div>
+        {/* Email */}
+        <label>Email</label>
+        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
 
-        <div>
-          <label htmlFor="address">Address:</label>
-          <textarea
-            name="address"
-            id="address"
-            value={formData.address}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {/* Gender */}
+        <label>Gender</label>
+        <input type="text" name="gender" value={formData.gender} onChange={handleChange} required />
 
-        <button type="submit">Add Appointment</button>
+        {/* Blood Group */}
+        <label>Blood Group</label>
+        <input type="text" name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} required />
+
+        {/* Address */}
+        <label>Address</label>
+        <textarea name="address" value={formData.address} onChange={handleChange} required />
+
+        {/* Submit Button */}
+        <button type="submit">Submit</button>
       </form>
     </div>
   );
