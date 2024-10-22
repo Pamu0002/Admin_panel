@@ -175,3 +175,12 @@ img {
         height: 250px; /* Reduce chart height for smaller screens */
     }
 }
+
+.charts {
+    display: flex;
+    justify-content: space-between; /* Space out the charts */
+}
+
+.chart, .line-chart {
+    width: 48%; /* Adjust width as necessary */
+}
