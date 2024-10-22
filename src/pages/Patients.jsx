@@ -15,6 +15,9 @@ const Patients = () => {
   const navigateToAddPatient = () => {
     navigate('/addnewpatient');
   };
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -115,25 +118,31 @@ const Patients = () => {
 
   return (
     <div className="patient-container">
+      <div className="breadcrumb-Container">
+        <div className="breadcrumb">
+        <span>Dashboard</span> {'>'}
+        <div className="breadcrumbs">
+          <span>Patient List</span>
+        </div>
+        </div>
+    </div>
+       
       <div className="header">
         <button className="add-patient" onClick={navigateToAddPatient}>+ Add Patient</button>
-        <div className="breadcrumb">
-          <span>Dashboard</span> {'>'} <span>Patient List</span>
-        </div>
-      </div>
-      <div className="patient-list">
-        <div className="list-header">
-          <h2>Patients List</h2>
-          <div className="filter-container">
+         <div className="filter-container">
             <input
               type="text"
               placeholder="Search by name"
               className="filter-input"
+              style={{ width: "300px", height: "auto" }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-        </div>
+       
+      </div>
+      <div className="patient-list">
+       
         <table className="patient-table">
           <thead>
             <tr>
@@ -210,7 +219,8 @@ const Patients = () => {
                     patient.nic
                   )}
                 </td>
-                <td>
+                <td style={{ textAlign: "center" }}>
+                  
                   {editingPatientId === patient.referenceNo ? (
                     <button
                       className="action-button save"
@@ -222,6 +232,12 @@ const Patients = () => {
                     <>
                       <button
                         className="action-button edit"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color:'#1ABC9C',
+                        }} /* Aligns icon and text */
                         onClick={() => handleEditPatient(patient.referenceNo, patient)}
                       >
                         <FaEdit />
@@ -229,6 +245,12 @@ const Patients = () => {
                       <button
                         className="action-button delete"
                         onClick={() => handleDeletePatient(patient.referenceNo)}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                           color:'#1ABC9C',
+                        }} /* Aligns icon and text */
                       >
                         <FaTrash />
                       </button>
@@ -240,7 +262,14 @@ const Patients = () => {
           </tbody>
         </table>
       </div>
+      <div className="back-button-container2">
+            <button className="back-btn2" onClick={handleBackToDashboard}>
+              Back
+            </button>
+          </div>
     </div>
+    
+    
   );
 };
 

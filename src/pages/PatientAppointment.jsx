@@ -100,7 +100,14 @@ const PatientAppointment = () => {
   };
 
   return (
-    <div className="appointments-container">
+    <div className="appointments-container"
+
+    >  <div className="breadcrumb-Container">
+        <div className="breadcrumb">
+          <span>Dashboard</span> {">"}
+        </div>
+        <div className="breadcrumbs">
+          <span>Doctor List</span></div></div>
       <div className="appointments-header">
         <button
           className="add-appointment-btn"
@@ -108,9 +115,7 @@ const PatientAppointment = () => {
         >
           Add Appointment +
         </button>
-        <div className="breadcrumb">
-          <span>Dashboard</span> &gt; <span className="current-page">Patient Appointments</span>
-        </div>
+       
         <input
           type="text"
           className="search-bar"
@@ -161,8 +166,8 @@ const PatientAppointment = () => {
         </table>
       </div>
 
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
+      <div className="back-button-container4">
+        <button className="back-button4" onClick={() => navigate('/dashboard')}>
           Back
         </button>
       </div>
