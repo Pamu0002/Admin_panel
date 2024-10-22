@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AddMedicine.css'; // CSS file for AddMedicine styling
 import AddmediImage from '../assets/images/Addmedicine.png';
-import { db } from '../firebase-config'; // Make sure you import your Firebase config
-import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase-config'; // Import your Firebase config
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function AddMedicine() {
@@ -13,6 +13,23 @@ function AddMedicine() {
   const [medicineType, setMedicineType] = useState('');
   const [price, setPrice] = useState('');
   const [message, setMessage] = useState('');
+
+  // Function to generate the next medicine ID
+  const generateMedicineId = async () => {
+    const medicineCollection = collection(db, 'Medicine');
+    const medicineSnapshot = await getDocs(medicineCollection);
+    const medicineCount = medicineSnapshot.size; // Count existing medicines
+
+    // Generate the medicine ID based on count
+    const nextId = medicineCount + 1; // Start from 1
+    const newId = `MED-${nextId.toString().padStart(2, '0')}`; // Format as MED-01, MED-02, etc.
+    setMedicineId(newId); // Set the generated ID
+  };
+
+  useEffect(() => {
+    // Call generateMedicineId when the component mounts
+    generateMedicineId();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,9 +46,8 @@ function AddMedicine() {
       await setDoc(doc(db, 'Medicine', medicineId), medicineData);
 
       setMessage('Medicine added successfully!');
-      
+
       // Reset form fields after submission
-      setMedicineId('');
       setMedicineName('');
       setBrandName('');
       setMedicineType('');
@@ -56,9 +72,8 @@ function AddMedicine() {
             <input
               type="text"
               value={medicineId}
-              onChange={(e) => setMedicineId(e.target.value)}
-              placeholder="Enter Medicine Id"
-              required
+              readOnly // Make the medicine ID read-only
+              placeholder="Generated Medicine Id"
             />
           </div>
           <div className="form-group">

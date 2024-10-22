@@ -34,13 +34,13 @@
 
 .add-appointment input:focus,
 .add-appointment select:focus {
-  border-color: #007bff;
+  border-color: #1ABC9C;
   outline: none;
 }
 
 .add-appointment button {
   padding: 10px;
-  background-color: #007bff;
+  background-color: #1ABC9C;
   color: white;
   border: none;
   border-radius: 4px;
@@ -49,5 +49,5 @@
 }
 
 .add-appointment button:hover {
-  background-color: #0056b3;
+  background-color: #1ABC9C;
 }

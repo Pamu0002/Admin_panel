@@ -32,10 +32,21 @@ const Addappointment = () => {
   const [doctors, setDoctors] = useState([]);
   const [appointmentDates, setAppointmentDates] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
+  const [bloodGroups] = useState(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
+  const [genders] = useState(['Male', 'Female', 'Other']);
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'nic' && !/^\d{0,12}$/.test(value)) {
+      return; // Allow only up to 12 digits
+    }
+    
+    if (name === 'phone' && !/^\d{0,10}$/.test(value)) {
+      return; // Allow only up to 10 digits
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'specialization') {
@@ -258,20 +269,20 @@ const Addappointment = () => {
     <div className="add-appointment">
       <h2>Add Appointment</h2>
       <form onSubmit={handleSubmit}>
-        {/* Schedule ID */}
-        <label>Schedule ID</label>
-        <input type="text" value={formData.scheduleId} readOnly />
-
         {/* Appointment Number */}
         <label>Appointment Number</label>
         <input type="text" value={formData.appointmentNumber} readOnly />
+
+        {/* Schedule ID */}
+        <label>Schedule ID</label>
+        <input type="text" value={formData.scheduleId} readOnly />
 
         {/* Specialization */}
         <label>Specialization</label>
         <select name="specialization" value={formData.specialization} onChange={handleChange}>
           <option value="">Select Specialization</option>
-          {specializations.map((spec) => (
-            <option key={spec} value={spec}>
+          {specializations.map((spec, index) => (
+            <option key={index} value={spec}>
               {spec}
             </option>
           ))}
@@ -281,9 +292,9 @@ const Addappointment = () => {
         <label>Doctor Name</label>
         <select name="doctorName" value={formData.doctorName} onChange={handleChange}>
           <option value="">Select Doctor</option>
-          {doctors.map((doc) => (
-            <option key={doc.id} value={doc.id}>
-              {doc.doctorName}
+          {doctors.map((doctor, index) => (
+            <option key={index} value={doctor.id}>
+              {doctor.doctorName}
             </option>
           ))}
         </select>
@@ -303,28 +314,85 @@ const Addappointment = () => {
         <label>Visiting Time</label>
         <select name="visitingTime" value={formData.visitingTime} onChange={handleChange}>
           <option value="">Select Time</option>
-          {timeSlots.map((slot) => (
-            <option key={slot.id} value={slot.time}>
+          {timeSlots.map((slot, index) => (
+            <option key={index} value={slot.time}>
               {slot.time}
             </option>
           ))}
         </select>
 
-        {/* Patient Info */}
-        <label>Patient Name</label>
-        <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} required />
+        {/* NIC */}
         <label>NIC</label>
-        <input type="text" name="nic" value={formData.nic} onChange={handleChange} required />
+        <input
+          type="text"
+          name="nic"
+          value={formData.nic}
+          onChange={handleChange}
+          maxLength="12"
+          required
+        />
+
+        {/* Patient Name */}
+        <label>Patient Name</label>
+        <input
+          type="text"
+          name="patientName"
+          value={formData.patientName}
+          onChange={handleChange}
+          required
+        />
+
+        {/* Phone */}
         <label>Phone</label>
-        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          maxLength="10"
+          required
+        />
+
+        {/* Email */}
         <label>Email</label>
-        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+
+        {/* Gender */}
         <label>Gender</label>
-        <input type="text" name="gender" value={formData.gender} onChange={handleChange} required />
+        <select name="gender" value={formData.gender} onChange={handleChange}>
+          <option value="">Select Gender</option>
+          {genders.map((gender, index) => (
+            <option key={index} value={gender}>
+              {gender}
+            </option>
+          ))}
+        </select>
+
+        {/* Blood Group */}
         <label>Blood Group</label>
-        <input type="text" name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} required />
+        <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}>
+          <option value="">Select Blood Group</option>
+          {bloodGroups.map((group, index) => (
+            <option key={index} value={group}>
+              {group}
+            </option>
+          ))}
+        </select>
+
+        {/* Address */}
         <label>Address</label>
-        <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+        <textarea
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          required
+        ></textarea>
 
         <button type="submit">Add Appointment</button>
       </form>

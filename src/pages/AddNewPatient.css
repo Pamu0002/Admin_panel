@@ -18,7 +18,8 @@ label {
   font-weight: bold;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 8px;
   border-radius: 5px;
@@ -26,7 +27,7 @@ input, select {
 }
 
 .register-button {
-  background-color: #1ABC9C;
+  background-color: #08B2A0;
   color: white;
   padding: 10px 15px;
   border: none;
@@ -34,30 +35,15 @@ input, select {
   cursor: pointer;
   margin-top: 20px;
   display: inline-block;
+  margin-left: 450px;
 }
 
 .register-button:hover {
-  background-color: #1ABC9C;
+  background-color: #4f837d;
 }
 
 .message {
   margin-top: 20px;
   font-weight: bold;
-  color: 1ABC9C;
-}
-
-.back-button {
-  position: absolute;
-  bottom: 50px;
-  right: 10px;
-  background-color: #1ABC9C;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.back-button:hover {
-  background-color: #1ABC9C;
+  color: green;
 }

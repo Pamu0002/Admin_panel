@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for back navigation
 import { db } from '../firebase-config'; // Import your Firebase config
-import { doc, setDoc, getDoc } from 'firebase/firestore'; // Import necessary Firestore methods
+import { doc, setDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import './AddNewPatient.css';
 
 const AddNewPatient = () => {
@@ -19,31 +18,18 @@ const AddNewPatient = () => {
   });
 
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // Use navigate for back button
 
-  // Function to get the latest reference number from the Patientcount collection
-  const getLatestReferenceNo = async () => {
+  // Function to generate the reference number based on existing patients
+  const generateReferenceNo = async () => {
     try {
-      const docRef = doc(db, 'Patientcount', 'latest'); // Assuming a single document with the latest reference number
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return docSnap.data().latestReferenceNo; // Return the latest reference number
-      } else {
-        console.log("No such document in Patientcount!");
-        return null; // Return null if no document found
-      }
+      const q = query(collection(db, 'Patients'), orderBy('referenceNo', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+      const totalPatients = querySnapshot.empty ? 0 : parseInt(querySnapshot.docs[0].data().referenceNo.split('-')[2]);
+      const referenceNo = `REF-2024-${totalPatients + 1}`;
+      return referenceNo;
     } catch (error) {
-      console.error('Error getting latest reference number:', error);
-      return null; // Handle the error
-    }
-  };
-
-  // Function to update the Patientcount collection with the new reference number
-  const updatePatientCount = async (newReferenceNo) => {
-    try {
-      await setDoc(doc(db, 'Patientcount', 'latest'), { latestReferenceNo: newReferenceNo });
-    } catch (error) {
-      console.error('Error updating Patientcount:', error);
+      console.error('Error generating reference number:', error);
+      return '';
     }
   };
 
@@ -55,18 +41,9 @@ const AddNewPatient = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Get the latest reference number from Patientcount
-      const latestRefNo = await getLatestReferenceNo();
-      const newRefNo = latestRefNo ? `REF-2024-${parseInt(latestRefNo.split('-')[2]) + 1}` : 'REF-2024-1';
-
-      // Add the new patient to the Patients collection
-      await setDoc(doc(db, 'Patients', newRefNo), { ...patientData, referenceNo: newRefNo });
-
-      // Update the Patientcount collection with the new reference number
-      await updatePatientCount(newRefNo);
-
+      const refNo = await generateReferenceNo(); // Get the new reference number before adding
+      await setDoc(doc(db, 'Patients', refNo), { ...patientData, referenceNo: refNo });
       setMessage('Patient registered successfully!');
-
       // Clear the form fields
       setPatientData({
         referenceNo: '',
@@ -86,10 +63,6 @@ const AddNewPatient = () => {
     }
   };
 
-  const handleBack = () => {
-    navigate(-1); // Navigate back to the previous page
-  };
-
   return (
     <div className="add-new-patient-container">
       <h2>Add Patient</h2>
@@ -105,7 +78,7 @@ const AddNewPatient = () => {
         </div>
         <div className="form-group">
           <label>Phone no:</label>
-          <input type="text" name="phone" value={patientData.phone} onChange={handleChange} required />
+          <input type="text" name="phone" value={patientData.phone} onChange={handleChange} maxLength={10} required />
         </div>
         <div className="form-group">
           <label>Gender:</label>
@@ -118,7 +91,7 @@ const AddNewPatient = () => {
         </div>
         <div className="form-group">
           <label>NIC:</label>
-          <input type="text" name="nic" value={patientData.nic} onChange={handleChange} required />
+          <input type="text" name="nic" value={patientData.nic} onChange={handleChange} maxLength={12} required />
         </div>
         <div className="form-group">
           <label>Email (Optional):</label>
@@ -134,7 +107,7 @@ const AddNewPatient = () => {
         </div>
         <div className="form-group">
           <label>Date of Birth:</label>
-          <input type="date" name="dob" value={patientData.dob} onChange={handleChange} required />
+          <input type="date" name="dob" value={patientData.dob} onChange={handleChange} required max={new Date().toISOString().split("T")[0]} />
         </div>
         <div className="form-group">
           <label>Allergies or Other:</label>
@@ -144,9 +117,6 @@ const AddNewPatient = () => {
         <button type="submit" className="register-button">Register</button>
       </form>
       {message && <p className="message">{message}</p>}
-
-      {/* Back Button */}
-      <button onClick={handleBack} className="back-button">Back</button>
     </div>
   );
 };

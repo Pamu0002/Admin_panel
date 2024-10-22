@@ -14,12 +14,13 @@
 }
 
 .table-container {
-  width: 100%;
-  max-width: 1050px; /* Set max width for the table */
-  background-color: white; /* Set the background color to white */
+  width: 90%; /* Keep the width responsive */
+  max-width: 1200px; /* Set max width */
+  background-color: white; /* Set background color */
   border-radius: 8px; /* Add rounded corners */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
   padding: 20px; /* Add padding around the table */
+  margin-left: auto; /* Align the container to the right */
 }
 
 .schedule-table {
@@ -46,7 +47,7 @@
 
 .back-button {
   padding: 10px 15px;
-  background-color: #D1F2EB; /* Change the button color to #1ABC9C */
+  background-color: #D1F2EB; /* Change the button color */
   color: white;
   border: none;
   border-radius: 5px;
@@ -55,5 +56,18 @@
 }
 
 .back-button:hover {
-  background-color: #D1F2EB; /* Darker shade of #1ABC9C on hover */
+  background-color: #D1F2EB; /* Darker shade on hover */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .table-container {
+    width: 100%; /* Full width on smaller screens */
+    padding: 10px; /* Reduce padding for smaller screens */
+    margin-left: 0; /* Remove right alignment on smaller screens */
+  }
+
+  .schedule-table th, .schedule-table td {
+    padding: 8px; /* Reduce padding for smaller screens */
+  }
 }
