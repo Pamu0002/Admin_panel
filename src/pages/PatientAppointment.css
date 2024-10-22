@@ -6,8 +6,7 @@
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  height:100ch;
-  
+  /* Removed height: 150ch; to allow automatic height adjustment */
 }
 
 .appointments-header {
@@ -17,8 +16,8 @@
   margin-bottom: 30px;
 }
 
-.make-appointment-btn {
-  background-color: #1ABC9C;
+.add-appointment-btn {
+  background-color: #218F7A; /* Updated button color */
   color: white;
   padding: 10px 20px;
   border: none;
@@ -28,8 +27,8 @@
   transition: background-color 0.3s;
 }
 
-.make-appointment-btn:hover {
-  background-color: #16a085;
+.add-appointment-btn:hover {
+  background-color: #1ABC9C; /* Lighter shade on hover */
 }
 
 .breadcrumb {
@@ -79,7 +78,8 @@
   background-color: #f5f5f5;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -97,7 +97,8 @@
   color: #f39c12;
 }
 
-.delete-btn:hover, .edit-btn:hover {
+.delete-btn:hover,
+.edit-btn:hover {
   opacity: 0.7;
 }
 
@@ -135,14 +136,14 @@
     width: 100%;
   }
 
-  .make-appointment-btn {
+  .add-appointment-btn {
     width: 100%;
     margin-top: 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .make-appointment-btn {
+  .add-appointment-btn {
     font-size: 16px;
     padding: 8px 15px;
   }
@@ -153,7 +154,8 @@
     padding: 8px;
   }
 
-  .edit-btn, .delete-btn {
+  .edit-btn,
+  .delete-btn {
     font-size: 14px;
   }
 }

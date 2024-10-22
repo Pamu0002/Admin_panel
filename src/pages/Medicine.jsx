@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { collection, doc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaTrash, FaEdit } from 'react-icons/fa'; // Icons for actions
 import { db } from '../firebase-config';
 import './Medicine.css';
 
@@ -77,7 +76,7 @@ function Medicine() {
   };
 
   const handleEditMedicine = (medicineId) => {
-    navigate(`/edit-medicine/${medicineId}`); // Fixed template literal
+    navigate(`/edit-medicine/${medicineId}`);
   };
 
   const filteredMedicines = medicines.filter((medicine) =>
@@ -86,14 +85,14 @@ function Medicine() {
 
   return (
     <div className="medicine-list-container">
-       <div className="breadcrumb-Container">
-          <div className="breadcrumb">
-            <span>Dashboard</span> {'>'}
-          </div>
-           <div className="breadcrumbs">
-            <span>Medicine List</span>
-          </div>
+      <div className="breadcrumb-Container">
+        <div className="breadcrumb">
+          <span>Dashboard</span> {'>'}
         </div>
+        <div className="breadcrumbs">
+          <span>Medicine List</span>
+        </div>
+      </div>
      
       {/* Header with search box */}
       <div className="page-header">
@@ -127,8 +126,6 @@ function Medicine() {
                   <th>Type</th>
                   <th>Brand</th>
                   <th>Price</th>
-                  <th>Status</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,41 +136,6 @@ function Medicine() {
                     <td>{medicine.medicineType}</td>
                     <td>{medicine.brandName}</td>
                     <td>Rs. {medicine.price}</td>
-                    <td>{medicine.isHidden ? 'Hidden' : 'Visible'}</td>
-                    <td>
-                      <div className="action-buttons">
-                        {medicine.isHidden ? (
-                          <button
-                            className="action-btn view"
-                            onClick={() => handleViewMedicine(medicine)}
-                          >
-                            <FaEyeSlash /> {/* Icon for "Unhide" */}
-                          </button>
-                        ) : (
-                          <button
-                            className="action-btn view"
-                            onClick={() => handleHideMedicine(medicine)}
-                            style={{ backgroundColor:'#1ABC9C', color:'white' }}
-                          >
-                            <FaEye /> {/* Icon for "Hide" */}
-                          </button>
-                        )}
-                        <button
-                          className="action-btn edit"
-                          onClick={() => handleEditMedicine(medicine.id)}
-                          style={{ backgroundColor:'#1ABC9C', color:'white' }}
-                        >
-                          <FaEdit /> {/* Icon for "Edit" */}
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDeleteMedicine(medicine.id)}
-                          style={{ backgroundColor:'#1ABC9C', color:'white' }}
-                        >
-                          <FaTrash /> {/* Icon for "Delete" */}
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>

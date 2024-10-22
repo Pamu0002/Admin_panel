@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase-config'; // Ensure the correct Firebase config path
 import { doc, getDoc } from 'firebase/firestore';
 import './DoctorDetails.css'; // Ensure the correct CSS file path
-import AdddocImage from '../assets/images/Pabhashini.png'; // Ensure the correct image path
 
 const DoctorDetails = () => {
   const { doctorId } = useParams(); // Retrieve doctorId from URL parameters
@@ -56,8 +55,12 @@ const DoctorDetails = () => {
       </div>
       <div className="doctor-info-content">
         <div className="doctor-info-left">
-          <img src={AdddocImage} alt="Doctor" className="doctor-image" />
-          <h3 className="doctor-name">{doctor.doctorName }</h3> {/* Doctor's full name */}
+          <img 
+            src={doctor.photo} // Use the photo field from Firestore
+            alt="Doctor"
+            className="doctor-image"
+          />
+          <h3 className="doctor-name">{doctor.doctorName}</h3> {/* Doctor's full name */}
           <p className="doctor-specialization">{doctor.specialization || 'Specialization not available'}</p>
           <div className="social-icons">
             {/* Replace # with actual social media links */}

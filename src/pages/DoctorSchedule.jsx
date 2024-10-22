@@ -96,51 +96,48 @@ const DoctorSchedule = () => {
       {loading ? (
         <p>Loading schedules...</p>
       ) : (
-        <table className="schedule-table">
-          <thead>
-            <tr>
-              <th>Doctor ID</th>
-              <th>Schedule ID</th>
-              <th>Appointment Date</th>
-              <th>Doctor Name</th>
-              <th>Specialization</th>
-              <th>Visiting Time</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schedules.length > 0 ? (
-              schedules.map((schedule) => (
-                <tr key={schedule.scheduleId}>
-                  <td>{schedule.doctorId}</td>
-                  <td>{schedule.scheduleId}</td>
-                  <td>{schedule.appointmentDate}</td>
-                  <td>{schedule.doctorName}</td>
-                  <td>{schedule.specialization}</td>
-                  <td>{schedule.visitingTime}</td>
-                  <td>
-                    <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteSchedule(schedule.doctorId, schedule.scheduleId)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
+        <div className="table-container">
+          <table className="schedule-table">
+            <thead>
               <tr>
-                <td colSpan="7">No schedules found.</td>
+                <th>Doctor ID</th>
+                <th>Schedule ID</th>
+                <th>Appointment Date</th>
+                <th>Doctor Name</th>
+                <th>Specialization</th>
+                <th>Visiting Time</th>
+                <th>Action</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {schedules.length > 0 ? (
+                schedules.map((schedule) => (
+                  <tr key={schedule.scheduleId}>
+                    <td>{schedule.doctorId}</td>
+                    <td>{schedule.scheduleId}</td>
+                    <td>{schedule.appointmentDate}</td>
+                    <td>{schedule.doctorName}</td>
+                    <td>{schedule.specialization}</td>
+                    <td>{schedule.visitingTime}</td>
+                    <td>
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteSchedule(schedule.doctorId, schedule.scheduleId)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7">No schedules found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
-
-      {/* Back button now navigates to the dashboard */}
-      <button className="back-button" onClick={() => navigate('/dashboard')}>
-        Back to Dashboard
-      </button>
     </div>
   );
 };

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for back navigation
 import { db } from '../firebase-config'; // Import your Firebase config
-import { doc, setDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore'; // Import necessary Firestore methods
 import './AddNewPatient.css';
 
 const AddNewPatient = () => {
@@ -21,17 +21,29 @@ const AddNewPatient = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate(); // Use navigate for back button
 
-  // Function to generate the reference number based on existing patients
-  const generateReferenceNo = async () => {
+  // Function to get the latest reference number from the Patientcount collection
+  const getLatestReferenceNo = async () => {
     try {
-      const q = query(collection(db, 'Patients'), orderBy('referenceNo', 'desc'), limit(1));
-      const querySnapshot = await getDocs(q);
-      const totalPatients = querySnapshot.empty ? 0 : parseInt(querySnapshot.docs[0].data().referenceNo.split('-')[2]);
-      const referenceNo = `REF-2024-${totalPatients + 1}`;
-      return referenceNo;
+      const docRef = doc(db, 'Patientcount', 'latest'); // Assuming a single document with the latest reference number
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data().latestReferenceNo; // Return the latest reference number
+      } else {
+        console.log("No such document in Patientcount!");
+        return null; // Return null if no document found
+      }
     } catch (error) {
-      console.error('Error generating reference number:', error);
-      return '';
+      console.error('Error getting latest reference number:', error);
+      return null; // Handle the error
+    }
+  };
+
+  // Function to update the Patientcount collection with the new reference number
+  const updatePatientCount = async (newReferenceNo) => {
+    try {
+      await setDoc(doc(db, 'Patientcount', 'latest'), { latestReferenceNo: newReferenceNo });
+    } catch (error) {
+      console.error('Error updating Patientcount:', error);
     }
   };
 
@@ -43,9 +55,18 @@ const AddNewPatient = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const refNo = await generateReferenceNo(); // Get the new reference number before adding
-      await setDoc(doc(db, 'Patients', refNo), { ...patientData, referenceNo: refNo });
+      // Get the latest reference number from Patientcount
+      const latestRefNo = await getLatestReferenceNo();
+      const newRefNo = latestRefNo ? `REF-2024-${parseInt(latestRefNo.split('-')[2]) + 1}` : 'REF-2024-1';
+
+      // Add the new patient to the Patients collection
+      await setDoc(doc(db, 'Patients', newRefNo), { ...patientData, referenceNo: newRefNo });
+
+      // Update the Patientcount collection with the new reference number
+      await updatePatientCount(newRefNo);
+
       setMessage('Patient registered successfully!');
+
       // Clear the form fields
       setPatientData({
         referenceNo: '',

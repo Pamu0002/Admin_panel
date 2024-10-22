@@ -52,7 +52,7 @@ select, input {
 }
 
 .doctor-name-item.selected {
-    background-color: #007bff;
+    background-color: #1ABC9C;
     color: rgb(0, 0, 0);
 }
 
@@ -84,7 +84,7 @@ select, input {
 }
 
 .time-slot.selected {
-    background-color: #007bff;
+    background-color: #1ABC9C;
     color: white;
 }
 
@@ -92,7 +92,7 @@ select, input {
     display: block;
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #1ABC9C;
     color: white;
     border: none;
     border-radius: 5px;
@@ -102,5 +102,5 @@ select, input {
 }
 
 .confirm-button:hover {
-    background-color: #0056b3;
+    background-color: #1ABC9C;
 }

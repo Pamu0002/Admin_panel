@@ -7,6 +7,7 @@ import './PatientAppointment.css'; // Import the relevant CSS
 const PatientAppointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAppointments, setSelectedAppointments] = useState([]); // State to track selected appointments
   const navigate = useNavigate(); // Initialize the navigate function
 
   // Fetch all appointments from Firestore and order by appointmentNumber
@@ -41,8 +42,28 @@ const PatientAppointment = () => {
       try {
         await deleteDoc(doc(db, 'Appointments', id)); // Delete appointment from Firestore
         setAppointments(appointments.filter((appointment) => appointment.id !== id)); // Remove deleted appointment from state
+        setSelectedAppointments(selectedAppointments.filter((appointmentId) => appointmentId !== id)); // Remove from selected
       } catch (error) {
         console.error('Error deleting appointment:', error);
+      }
+    }
+  };
+
+  // Delete selected appointments
+  const handleDeleteSelected = async () => {
+    const confirmDelete = window.confirm('Are you sure you want to delete the selected appointments?');
+    if (confirmDelete) {
+      try {
+        await Promise.all(
+          selectedAppointments.map(async (appointmentId) => {
+            await deleteDoc(doc(db, 'Appointments', appointmentId)); // Delete appointment from Firestore
+          })
+        );
+        // Update appointments state to remove deleted appointments
+        setAppointments(appointments.filter((appointment) => !selectedAppointments.includes(appointment.id)));
+        setSelectedAppointments([]); // Clear selected appointments
+      } catch (error) {
+        console.error('Error deleting selected appointments:', error);
       }
     }
   };
@@ -100,14 +121,16 @@ const PatientAppointment = () => {
   };
 
   return (
-    <div className="appointments-container"
-
-    >  <div className="breadcrumb-Container">
+    <div className="appointments-container">
+      <div className="breadcrumb-Container">
         <div className="breadcrumb">
           <span>Dashboard</span> {">"}
         </div>
         <div className="breadcrumbs">
-          <span>Doctor List</span></div></div>
+          <span>Doctor List</span>
+        </div>
+      </div>
+
       <div className="appointments-header">
         <button
           className="add-appointment-btn"
@@ -125,12 +148,36 @@ const PatientAppointment = () => {
         />
       </div>
 
+      {/* Action Bar */}
+      <div className="action-bar">
+        <button 
+          className="delete-selected-btn" 
+          onClick={handleDeleteSelected}
+          disabled={selectedAppointments.length === 0} // Disable if no appointments selected
+        >
+          Delete Selected
+        </button>
+      </div>
+
       <div className="appointments-table">
         <table>
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedAppointments(filteredAppointments.map((appointment) => appointment.id)); // Select all
+                    } else {
+                      setSelectedAppointments([]); // Deselect all
+                    }
+                  }}
+                  checked={selectedAppointments.length === filteredAppointments.length}
+                />
+              </th>
               <th>Appointment Number</th>
-              <th>Specialization</th> {/* New column for specialization */}
+              <th>Specialization</th>
               <th>Doctor Name</th>
               <th>Patient Name</th>
               <th>Appointment Date</th>
@@ -140,11 +187,24 @@ const PatientAppointment = () => {
           <tbody>
             {filteredAppointments.length === 0 ? (
               <tr>
-                <td colSpan="6">No appointments found</td> {/* Adjusted colspan */}
+                <td colSpan="7">No appointments found</td> {/* Adjusted colspan */}
               </tr>
             ) : (
               filteredAppointments.map((appointment) => (
                 <tr key={appointment.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedAppointments.includes(appointment.id)} // Check if this appointment is selected
+                      onChange={() => {
+                        if (selectedAppointments.includes(appointment.id)) {
+                          setSelectedAppointments(selectedAppointments.filter((id) => id !== appointment.id)); // Deselect
+                        } else {
+                          setSelectedAppointments([...selectedAppointments, appointment.id]); // Select
+                        }
+                      }}
+                    />
+                  </td>
                   <td>{appointment.appointmentNumber}</td>
                   <td>{appointment.specialization}</td> {/* Display specialization */}
                   <td>
